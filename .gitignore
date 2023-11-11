@@ -42,6 +42,13 @@
 *.idb
 *.pdb
 
+# Folders
+.vscode/
+
+# Exe
+*.exe
+logica
+
 # Kernel Module Compile Results
 *.mod*
 *.cmd
