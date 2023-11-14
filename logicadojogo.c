@@ -546,9 +546,9 @@ void iniciarTabuleiro (Peca jogo[TAM][TAM]) {
 //     jogo[4][2].time = 'R';
 //     jogo[4][1].time = 'R';
 //     int vetL[4];
-//     for (int i = 0; i < 4; i++) {
-//         vetL[i] = 1;
-//     }
+    // for (int i = 0; i < 4; i++) {
+    //     vetL[i] = 1;
+    // }
 
 //     verificarLivre(vetL, jogo, jogo[x][y].i, jogo[x][y].j);
 
