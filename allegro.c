@@ -537,7 +537,7 @@ void atualizarTabuleiro (Peca jogo[TAM][TAM], ALLEGRO_BITMAP *tabuleiro) {
                 jogo[i][j].raio = 30;
         }
     }
-    al_flip_display();
+    
 }
 
 int main()
@@ -547,6 +547,7 @@ int main()
     ALLEGRO_FONT *font = NULL;
     ALLEGRO_BITMAP *tabuleiro = NULL;
     ALLEGRO_EVENT_QUEUE *fila_eventos = NULL;
+    ALLEGRO_TIMER *timer = NULL;
 
     // Inicializando a biblioteca Allegro
     al_init();
@@ -579,6 +580,8 @@ int main()
         return -1;
     }
 
+    timer = al_create_timer(1.0);
+    al_start_timer(timer);
 
     // Criando a janela principal
     janela = al_create_display(LARGURA_TELA, ALTURA_TELA);
@@ -613,6 +616,7 @@ int main()
     // Registrando os eventos da janela principal e do mouse
     al_register_event_source(fila_eventos, al_get_display_event_source(janela));
     al_register_event_source(fila_eventos, al_get_mouse_event_source());
+    al_register_event_source(fila_eventos, al_get_timer_event_source(timer));
     
     // Constante da tela, botões e posicionamentos
     int xBotao = LARGURA_TELA / 2 - 100, yBotao = ALTURA_TELA / 4 + 50;
@@ -620,8 +624,11 @@ int main()
     ALLEGRO_COLOR corAzulPeca = al_map_rgb(0, 0, 255);
     ALLEGRO_COLOR corTrasparente = al_map_rgba(255, 200, 0, 100);
     
+    // Variaveis do jogo - Allegro
+    int segundos, minutos, horas;
+
     // Variaveis do jogo - flags
-    int rodando = 1, situacao = 6, situacaoDJogo = 0, podeJogar = 0;
+    int rodando = 1, situacao = 1, situacaoDJogo = 0, podeJogar = 0;
     
     // Variáveis do jogo - lógica
     char turno = 'R';
@@ -645,10 +652,26 @@ int main()
                 rodando = 0;
             }
 
+            if (evento.type == ALLEGRO_EVENT_TIMER && situacao == 2) {
+                    segundos++;
+                    printf("%d:%d:%d\n", horas, minutos, segundos);
+                    if (segundos == 60) {
+                        minutos++;
+                        segundos = 0;
+                    }
+                    if (minutos == 60) {
+                        horas++;
+                        minutos = 0;
+                    }
+            }
+
             if (situacao == 1 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
                 if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 200 && evento.mouse.y >= yBotao && evento.mouse.y <= yBotao + 50) {
                     situacao = 2;
                     iniciarTabuleiro(jogo);
+                    segundos = 0;
+                    minutos = 0;
+                    horas = 0;
                     totPecasA = 12;
                     totPecasV = 12;
                 }
@@ -690,6 +713,7 @@ int main()
                     for (int k = 0; k < 8; k++) {
                         if (podeAndarPosicoes.i[k] != -1) {
                             atualizarTabuleiro(jogo, tabuleiro);
+                            al_flip_display();
                             int i = podeAndarPosicoes.i[k];
                             int j = podeAndarPosicoes.j[k];
                             if (evento.mouse.x >= jogo[i][j].x - jogo[i][j].raio && evento.mouse.x <= jogo[i][j].x + jogo[i][j].raio && evento.mouse.y >= jogo[i][j].y - jogo[i][j].raio && evento.mouse.y <= jogo[i][j].y + jogo[i][j].raio) {
@@ -702,6 +726,7 @@ int main()
                             }
                         }
                         if (podeComerArcoPPosicoes.i[k] != -1) {
+                            al_flip_display();
                             atualizarTabuleiro(jogo, tabuleiro);
                             int i = podeComerArcoPPosicoes.i[k];
                             int j = podeComerArcoPPosicoes.j[k];
@@ -729,6 +754,7 @@ int main()
                         }
                         if (podeComerArcoGPosicoes.i[k] != -1) {
                             atualizarTabuleiro(jogo, tabuleiro);
+                            al_flip_display();
                             int i = podeComerArcoGPosicoes.i[k];
                             int j = podeComerArcoGPosicoes.j[k];
                             if (evento.mouse.x >= jogo[i][j].x - jogo[i][j].raio && evento.mouse.x <= jogo[i][j].x + jogo[i][j].raio && evento.mouse.y >= jogo[i][j].y - jogo[i][j].raio && evento.mouse.y <= jogo[i][j].y + jogo[i][j].raio) {
@@ -786,8 +812,11 @@ int main()
             al_flip_display();
             break;
         case 2:
+                al_draw_textf(font, al_map_rgb(0, 0, 0), LARGURA_TELA - 100, 10, ALLEGRO_ALIGN_RIGHT, "Tempo: %02d:%02d:%02d", horas, minutos, segundos);
             if (podeJogar != 1) {
                 atualizarTabuleiro(jogo, tabuleiro);
+                al_draw_textf(font, al_map_rgb(0, 0, 0), LARGURA_TELA - 100, 10, ALLEGRO_ALIGN_RIGHT, "Tempo: %02d:%02d:%02d", horas, minutos, segundos);
+                al_flip_display();
             }
             if (situacaoDJogo) {
                 inicializarStruct(&podeAndarPosicoes, jogo);
