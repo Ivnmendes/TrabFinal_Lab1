@@ -613,9 +613,6 @@ int main()
     // Registrando os eventos da janela principal e do mouse
     al_register_event_source(fila_eventos, al_get_display_event_source(janela));
     al_register_event_source(fila_eventos, al_get_mouse_event_source());
-
-    // Variaveis do jogo - flags
-    int rodando = 1, situacao = 1, situacaoDJogo = 0;
     
     // Constante da tela, botões e posicionamentos
     int xBotao = LARGURA_TELA / 2 - 100, yBotao = ALTURA_TELA / 4 + 50;
@@ -623,9 +620,11 @@ int main()
     ALLEGRO_COLOR corAzulPeca = al_map_rgb(0, 0, 255);
     ALLEGRO_COLOR corTrasparente = al_map_rgba(255, 200, 0, 100);
     
-    // Variáveis da lógica do jogo
+    // Variaveis do jogo - flags
+    int rodando = 1, situacao = 6, situacaoDJogo = 0, podeJogar = 0;
+    
+    // Variáveis do jogo - lógica
     char turno = 'R';
-    int podeJogar = 0;
     int totPecasV, totPecasA;
     int vetL[4];
     Peca jogo[TAM][TAM];
@@ -755,6 +754,19 @@ int main()
                             }
                         }
                     }
+                }               
+            }
+            if (situacao == 6 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+                if (evento.mouse.y >= yBotao && evento.mouse.y <= yBotao + 50) {
+                    if (evento.mouse.x >= xBotao - 150 && evento.mouse.x <= xBotao + 50) {
+                        situacao = 2;
+                        iniciarTabuleiro(jogo);
+                        totPecasA = 12;
+                        totPecasV = 12;
+                    }
+                    if (evento.mouse.x >= xBotao + 100 && evento.mouse.x <= xBotao + 300) {
+                        situacao = 1;
+                    }
                 }
             }
         }
@@ -819,8 +831,11 @@ int main()
             } else {
                 al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5, ALLEGRO_ALIGN_CENTER, "Azul venceu!");
             }
-            al_draw_rectangle(xBotao - 100, ALTURA_TELA / 4 + 50, xBotao + 100, ALTURA_TELA / 4 + 100, al_map_rgb(0, 0, 0), 2);
+            al_draw_rectangle(xBotao - 150, yBotao, xBotao + 50, yBotao + 50, al_map_rgb(0, 0, 0), 2);
             al_draw_text(font, al_map_rgb(0, 0, 0), xBotao - 50, ALTURA_TELA / 4 + 70, ALLEGRO_ALIGN_CENTER, "Recomecar");
+            al_draw_rectangle(xBotao + 100, yBotao, xBotao + 300, yBotao + 50, al_map_rgb(0, 0, 0), 2);
+            al_draw_text(font, al_map_rgb(0, 0, 0), xBotao + 200, ALTURA_TELA / 4 + 70, ALLEGRO_ALIGN_CENTER, "Voltar ao menu");
+            
             al_flip_display();
             break;
         default:
