@@ -3,27 +3,27 @@
 #define TAM 6
 
 // Se pode comer parar de funcionar, alterar o tamanho do vetor de posicao e mexer na func inicializar struct
-typedef struct posicao {
-    int i[8];
-    int j[8];
-} Posicao;
+// typedef struct posicao {
+//     int i[8];
+//     int j[8];
+// } Posicao;
 
-typedef struct peca {
-    int i;
-    int j;
-    char time;
-    float x;
-    float y;
-    float raio;
-} Peca;
+// typedef struct peca {
+//     int i;
+//     int j;
+//     char time;
+//     float x;
+//     float y;
+//     float raio;
+// } Peca;
 
 
-void inicializarStruct(Posicao *p) {
-    for (int i = 0; i < 8; i++) {
-        p->i[i] = -1;
-        p->j[i] = -1;
-    }
-}
+// void inicializarStruct(Posicao *p) {
+//     for (int i = 0; i < 8; i++) {
+//         p->i[i] = -1;
+//         p->j[i] = -1;
+//     }
+// }
 
 void inicializarArcoP (Peca arcoP[24], Peca jogo[TAM][TAM]) {
     for (int i = 0, j = 0, k = 5; i < 24; i++, j++) {
@@ -471,25 +471,30 @@ void verificarLivre(int vetPos[], Peca tabuleiro[TAM][TAM], int posI, int posJ) 
     cont++;
 }
 
-void podeAndar (Peca jogo[TAM][TAM], Peca pecaSelecionada, Posicao *posicaoAnda) {
-    if (pecaSelecionada.time != '-') {
-        int cont = 0;
-        for (int i = -1; i <= 1; i++) {
-            for (int j = -1; j <= 1; j++) {
-                int ni = pecaSelecionada.i + i;
-                int nj = pecaSelecionada.j + j;
+// void podeAndar (Peca jogo[TAM][TAM], Peca pecaSelecionada, Posicao *posicaoAnda) {
+//     if (pecaSelecionada.time != '-') {
+//         int cont = 0;
+//         for (int i = -1; i <= 1; i++) {
+//             for (int j = -1; j <= 1; j++) {
+//                 int ni = pecaSelecionada.i + i;
+//                 int nj = pecaSelecionada.j + j;
 
-                // Verifica se a posição é válida e se está vazia
-                if (ni >= 0 && ni < TAM && nj >= 0 && nj < TAM && jogo[ni][nj].time == '-') {
-                    posicaoAnda->i[cont] = ni;
-                    posicaoAnda->j[cont] = nj;
-                    cont++;
+//                 // Verifica se a posição é válida e se está vazia
+//                 if (ni >= 0 && ni < TAM && nj >= 0 && nj < TAM && jogo[ni][nj].time == '-') {
+//                     posicaoAnda->i[cont] = ni;
+//                     posicaoAnda->j[cont] = nj;
+//                     cont++;
 
-                }
-            }
-        }
-    }
-}
+//                 }
+//             }
+//         }
+//     }
+//     // exibe posicaoAnda
+//     // printf("Posicoes que pode andar: ");
+//     // for (int i = 0; i < 8; i++) {
+//     //     printf("i = %d j = %d, ", posicaoAnda->i[i], posicaoAnda->j[i]);
+//     // }
+// }
 
 void iniciarTabuleiro (Peca jogo[TAM][TAM]) {
         for (int i = 0; i < TAM; i++) {
