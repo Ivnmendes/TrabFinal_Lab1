@@ -553,6 +553,23 @@ void atualizarTabuleiro (Peca jogo[TAM][TAM], ALLEGRO_BITMAP *tabuleiro, Posicao
     }    
 }
 
+void exibirJogo (Peca jogo[TAM][TAM], Posicao podeAndarPosicoes, Posicao podeComerArcoPPosicoes, Posicao podeComerArcoGPosicoes, ALLEGRO_BITMAP *tabuleiro, ALLEGRO_FONT *font, int horas, int minutos, int segundos, int turno, ALLEGRO_COLOR corTrasparente, int podeJogar, int *situacaoDJogo) {
+    //atualizarTabuleiro(jogo, tabuleiro, podeAndarPosicoes, podeComerArcoPPosicoes, podeComerArcoGPosicoes, corTrasparente, &podeJogar, situacaoDJogo);    
+    al_draw_textf(font, al_map_rgb(0, 0, 0), LARGURA_TELA - 100, 10, ALLEGRO_ALIGN_RIGHT, "Tempo: %02d:%02d:%02d", horas, minutos, segundos);
+    al_draw_rectangle(LARGURA_TELA - 150, ALTURA_TELA - 150, LARGURA_TELA, ALTURA_TELA - 80, al_map_rgb(0, 0, 0), 2);
+    al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA - 75, ALTURA_TELA - 130, ALLEGRO_ALIGN_CENTER, "Pausar");
+    if (turno == 'R') {
+        al_draw_text(font, al_map_rgb(255, 0, 0), LARGURA_TELA - 150, 20, ALLEGRO_ALIGN_CENTER, "Turno do vermelho");
+    } else {
+        al_draw_text(font, al_map_rgb(0, 0, 255), LARGURA_TELA - 150, 20, ALLEGRO_ALIGN_CENTER, "Turno do azul");
+    }
+    if (!podeJogar)
+    {
+        *situacaoDJogo = 0;
+    }
+    al_flip_display();
+}
+
 int main()
 {
     // Variaveis da janela principal
@@ -609,6 +626,9 @@ int main()
         printf("Falha ao criar a janela");
         return -1;
     }
+    al_set_new_display_option(ALLEGRO_SAMPLE_BUFFERS, 20, ALLEGRO_SUGGEST);
+    al_set_new_display_option(ALLEGRO_SAMPLES, 8, ALLEGRO_SUGGEST);
+    al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
 
     // Carregando a fonte
     //font = al_load_font("./OptimusPrinceps.ttf", 36, 0);
@@ -703,6 +723,9 @@ int main()
                     segundos = 0;
                     minutos = 0;
                     horas = 0;
+                    situacaoDJogo = 0;
+                    podeJogar = 0;
+                    pecaEscolhida.i = -1;
                     totPecasA = 12;
                     totPecasV = 12;
                     al_rest(0.01);
@@ -821,6 +844,9 @@ int main()
                         segundos = 0;
                         minutos = 0;
                         horas = 0;
+                        situacaoDJogo = 0;
+                        podeJogar = 0;
+                        pecaEscolhida.i = -1;
                         totPecasA = 12;
                         totPecasV = 12;
                     } else if (evento.mouse.x >= xBotao + 100 && evento.mouse.x <= xBotao + 300) {
@@ -859,21 +885,9 @@ int main()
                     verificarLivre(vetL, jogo, pecaEscolhida.i, pecaEscolhida.j);
                     podeComerArcoG(vetL, jogo, pecaEscolhida, &podeComerArcoGPosicoes);
                 }
-            }
+            }                
             atualizarTabuleiro(jogo, tabuleiro, podeAndarPosicoes, podeComerArcoPPosicoes, podeComerArcoGPosicoes, corTrasparente, &podeJogar, situacaoDJogo);    
-            al_draw_textf(font, al_map_rgb(0, 0, 0), LARGURA_TELA - 100, 10, ALLEGRO_ALIGN_RIGHT, "Tempo: %02d:%02d:%02d", horas, minutos, segundos);
-            al_draw_rectangle(LARGURA_TELA - 150, ALTURA_TELA - 150, LARGURA_TELA, ALTURA_TELA - 80, al_map_rgb(0, 0, 0), 2);
-            al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA - 75, ALTURA_TELA - 130, ALLEGRO_ALIGN_CENTER, "Pausar");
-            if (turno == 'R') {
-                al_draw_text(font, al_map_rgb(255, 0, 0), LARGURA_TELA - 150, 20, ALLEGRO_ALIGN_CENTER, "Turno do vermelho");
-            } else {
-                al_draw_text(font, al_map_rgb(0, 0, 255), LARGURA_TELA - 150, 20, ALLEGRO_ALIGN_CENTER, "Turno do azul");
-            }
-            if (!podeJogar)
-            {
-                situacaoDJogo = 0;
-            }
-            al_flip_display();
+            exibirJogo (jogo, podeAndarPosicoes, podeComerArcoPPosicoes, podeComerArcoGPosicoes, tabuleiro, font, horas, minutos, segundos, turno, corTrasparente, podeJogar, &situacaoDJogo);
             break;
         case 6:
             al_clear_to_color(al_map_rgb(255, 255, 255));
