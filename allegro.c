@@ -6,13 +6,10 @@
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
 
-//#include "logicadojogo.h"
-
 #define LARGURA_TELA 1280
 #define ALTURA_TELA 720
-
-// código teste, apagar a partir daqui até o luan 7
 #define TAM 6
+
 typedef struct posicao {
     int i[8];
     int j[8];
@@ -493,7 +490,7 @@ void iniciarTabuleiro (Peca jogo[TAM][TAM]) {
             }
         }
 }
-// Luan 7
+
 void podeAndar (Peca jogo[TAM][TAM], Peca pecaSelecionada, Posicao *posicaoAnda) {
     if (pecaSelecionada.time != '-') {
         int cont = 0;
@@ -521,7 +518,7 @@ void inicializarStruct(Posicao *p, Peca jogo[TAM][TAM]) {
     }
 }
 
-void atualizarTabuleiro (Peca jogo[TAM][TAM], ALLEGRO_BITMAP *tabuleiro) {
+void atualizarTabuleiro (Peca jogo[TAM][TAM], ALLEGRO_BITMAP *tabuleiro, Posicao podeAndarPosicoes, Posicao podeComerArcoPPosicoes, Posicao podeComerArcoGPosicoes, ALLEGRO_COLOR corTrasparente, int *podeJogar, int situacaoDJogo) {
     al_clear_to_color(al_map_rgb(255, 255, 255));
     al_draw_scaled_bitmap(tabuleiro, 0, 0, al_get_bitmap_width(tabuleiro), al_get_bitmap_height(tabuleiro), 0, 0, 800, 600, 0);
     for (int i = 0, y = 0; i < TAM; i++, y+=67) {
@@ -537,7 +534,23 @@ void atualizarTabuleiro (Peca jogo[TAM][TAM], ALLEGRO_BITMAP *tabuleiro) {
                 jogo[i][j].raio = 30;
         }
     }
-    
+
+    if (situacaoDJogo) {
+        for (int i = 0; i < 8; i++) {
+            if (podeAndarPosicoes.i[i] != -1 && podeAndarPosicoes.j[i] != -1) {
+                al_draw_filled_circle(175 + podeAndarPosicoes.j[i] * 87, 140 + podeAndarPosicoes.i[i] * 67, 30, corTrasparente);
+                *podeJogar = 1;
+            }
+            if (podeComerArcoPPosicoes.i[i] != - 1) {
+                al_draw_filled_circle(175 + podeComerArcoPPosicoes.j[i] * 87, 140 + podeComerArcoPPosicoes.i[i] * 67, 30, corTrasparente);
+                *podeJogar = 1;
+            }
+            if (podeComerArcoGPosicoes.i[i] != - 1) {
+                al_draw_filled_circle(175 + podeComerArcoGPosicoes.j[i] * 87, 140 + podeComerArcoGPosicoes.i[i] * 67, 30, corTrasparente);
+                *podeJogar = 1;
+            }
+        }
+    }    
 }
 
 int main()
@@ -580,6 +593,13 @@ int main()
         return -1;
     }
 
+    //apagar dps
+    al_install_keyboard();
+    if (!al_install_keyboard()) {
+        printf("Falha ao inicializar o teclado");
+        return -1;
+    }
+
     timer = al_create_timer(1.0);
     al_start_timer(timer);
 
@@ -616,6 +636,7 @@ int main()
     // Registrando os eventos da janela principal e do mouse
     al_register_event_source(fila_eventos, al_get_display_event_source(janela));
     al_register_event_source(fila_eventos, al_get_mouse_event_source());
+    al_register_event_source(fila_eventos, al_get_keyboard_event_source());
     al_register_event_source(fila_eventos, al_get_timer_event_source(timer));
     
     // Constante da tela, botões e posicionamentos
@@ -636,6 +657,7 @@ int main()
     int vetL[4];
     Peca jogo[TAM][TAM];
     Peca pecaEscolhida;
+    pecaEscolhida.i = -1;
     Posicao podeAndarPosicoes;
     Posicao podeComerArcoGPosicoes;
     Posicao podeComerArcoPPosicoes;
@@ -648,13 +670,17 @@ int main()
             ALLEGRO_EVENT evento;
             al_wait_for_event(fila_eventos, &evento);
 
+            if (evento.type == ALLEGRO_EVENT_KEY_DOWN) {
+                if (evento.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+                    situacao = 6;
+                }
+            }
             if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
                 rodando = 0;
             }
 
             if (evento.type == ALLEGRO_EVENT_TIMER && situacao == 2) {
                     segundos++;
-                    printf("%d:%d:%d\n", horas, minutos, segundos);
                     if (segundos == 60) {
                         minutos++;
                         segundos = 0;
@@ -662,6 +688,11 @@ int main()
                     if (minutos == 60) {
                         horas++;
                         minutos = 0;
+                    }
+                    if (horas == 24) {
+                        segundos = 0;
+                        minutos = 0;
+                        horas = 0;
                     }
             }
 
@@ -674,46 +705,44 @@ int main()
                     horas = 0;
                     totPecasA = 12;
                     totPecasV = 12;
+                    al_rest(0.01);
                 }
                 else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 200 && evento.mouse.y >= yBotao + 80 && evento.mouse.y <= yBotao + 130) {
                     situacao = 3;
+                    al_rest(0.01);
                 }
                 else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 200 && evento.mouse.y >= yBotao + 160 && evento.mouse.y <= yBotao + 210) {
                     situacao = 4;
+                    al_rest(0.01);
                 }
                 else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 200 && evento.mouse.y >= yBotao + 230 && evento.mouse.y <= yBotao + 280) {
                     situacao = 5;
+                    al_rest(0.01);
                 }
             }
             if (situacao == 2 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
                 if (evento.mouse.x >= 0 && evento.mouse.x <= 800 && evento.mouse.y >= 0 && evento.mouse.y <= 600) {
                     int i = (evento.mouse.y - 140) / 67;
                     int j = (evento.mouse.x - 175) / 87;
-                    int achou;
                     for (int i = 0; i < TAM; i++) {
                         for (int j = 0; j < TAM; j++) {
                             if (evento.mouse.x >= jogo[i][j].x - jogo[i][j].raio && evento.mouse.x <= jogo[i][j].x + jogo[i][j].raio && evento.mouse.y >= jogo[i][j].y - jogo[i][j].raio && evento.mouse.y <= jogo[i][j].y + jogo[i][j].raio && jogo[i][j].time == turno) {
                                 pecaEscolhida.i = jogo[i][j].i;
                                 pecaEscolhida.j = jogo[i][j].j;
                                 pecaEscolhida.time = jogo[i][j].time;
-                                achou = 1;
                                 i=6;
                                 situacaoDJogo = 1;
                                 break;
-                            } else {
-                                situacaoDJogo = 0;
-                                achou = 0;
                             }
                         }
                     }
                 }
+                al_rest(0.01);
             }
             if (situacao == 2 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
                 if (podeJogar == 1 && evento.mouse.x >= 0 && evento.mouse.x <= 800 && evento.mouse.y >= 0 && evento.mouse.y <= 600) {
                     for (int k = 0; k < 8; k++) {
                         if (podeAndarPosicoes.i[k] != -1) {
-                            atualizarTabuleiro(jogo, tabuleiro);
-                            al_flip_display();
                             int i = podeAndarPosicoes.i[k];
                             int j = podeAndarPosicoes.j[k];
                             if (evento.mouse.x >= jogo[i][j].x - jogo[i][j].raio && evento.mouse.x <= jogo[i][j].x + jogo[i][j].raio && evento.mouse.y >= jogo[i][j].y - jogo[i][j].raio && evento.mouse.y <= jogo[i][j].y + jogo[i][j].raio) {
@@ -722,25 +751,20 @@ int main()
                                 turno = (turno == 'R') ? 'B' : 'R';
                                 situacaoDJogo = 0;
                                 podeJogar = 0;
+                                pecaEscolhida.i = -1;
                                 break;
                             }
                         }
                         if (podeComerArcoPPosicoes.i[k] != -1) {
-                            al_flip_display();
-                            atualizarTabuleiro(jogo, tabuleiro);
                             int i = podeComerArcoPPosicoes.i[k];
                             int j = podeComerArcoPPosicoes.j[k];
                             if (evento.mouse.x >= jogo[i][j].x - jogo[i][j].raio && evento.mouse.x <= jogo[i][j].x + jogo[i][j].raio && evento.mouse.y >= jogo[i][j].y - jogo[i][j].raio && evento.mouse.y <= jogo[i][j].y + jogo[i][j].raio) {
                                 jogo[pecaEscolhida.i][pecaEscolhida.j].time = '-';
                                 jogo[i][j].time = pecaEscolhida.time;
-                                if (turno == 'r') {
-                                    printf("Azul comeu uma peça vermelha\n");
+                                if (turno == 'R') {
                                     totPecasV--;
-                                    printf("Pecas vermelhas restantes: %d\n", totPecasV);
                                 } else {
-                                    printf("Vermelho comeu uma peça azul\n");
                                     totPecasA--;
-                                    printf("Pecas azuis restantes: %d\n", totPecasA);
                                 }
                                 if (totPecasA == 0 || totPecasV == 0) {
                                     situacao = 6;
@@ -749,25 +773,21 @@ int main()
                                 turno = (turno == 'R') ? 'B' : 'R';
                                 situacaoDJogo = 0;
                                 podeJogar = 0;
+                                pecaEscolhida.i = -1;
+                                inicializarStruct(&podeComerArcoPPosicoes, jogo);
                                 break;
                             }
                         }
                         if (podeComerArcoGPosicoes.i[k] != -1) {
-                            atualizarTabuleiro(jogo, tabuleiro);
-                            al_flip_display();
                             int i = podeComerArcoGPosicoes.i[k];
                             int j = podeComerArcoGPosicoes.j[k];
                             if (evento.mouse.x >= jogo[i][j].x - jogo[i][j].raio && evento.mouse.x <= jogo[i][j].x + jogo[i][j].raio && evento.mouse.y >= jogo[i][j].y - jogo[i][j].raio && evento.mouse.y <= jogo[i][j].y + jogo[i][j].raio) {
                                 jogo[pecaEscolhida.i][pecaEscolhida.j].time = '-';
                                 jogo[i][j].time = pecaEscolhida.time;
-                                if (turno == 'r') {
-                                    printf("Azul comeu uma peça vermelha\n");
+                                if (turno == 'R') {
                                     totPecasV--;
-                                    printf("Pecas vermelhas restantes: %d\n", totPecasV);
                                 } else {
-                                    printf("Vermelho comeu uma peça azul\n");
                                     totPecasA--;
-                                    printf("Pecas azuis restantes: %d\n", totPecasA);
                                 }
                                 if (totPecasA == 0 || totPecasV == 0) {
                                     situacao = 6;
@@ -776,23 +796,30 @@ int main()
                                 turno = (turno == 'R') ? 'B' : 'R';
                                 situacaoDJogo = 0;
                                 podeJogar = 0;
+                                pecaEscolhida.i = -1;
+                                inicializarStruct(&podeComerArcoGPosicoes, jogo);
                                 break;
                             }
                         }
                     }
-                }               
+                }   
+                al_rest(0.01);
             }
+            
             if (situacao == 6 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
                 if (evento.mouse.y >= yBotao && evento.mouse.y <= yBotao + 50) {
                     if (evento.mouse.x >= xBotao - 150 && evento.mouse.x <= xBotao + 50) {
                         situacao = 2;
                         iniciarTabuleiro(jogo);
+                        segundos = 0;
+                        minutos = 0;
+                        horas = 0;
                         totPecasA = 12;
                         totPecasV = 12;
-                    }
-                    if (evento.mouse.x >= xBotao + 100 && evento.mouse.x <= xBotao + 300) {
+                    } else if (evento.mouse.x >= xBotao + 100 && evento.mouse.x <= xBotao + 300) {
                         situacao = 1;
                     }
+                    al_rest(0.01);
                 }
             }
         }
@@ -812,16 +839,10 @@ int main()
             al_flip_display();
             break;
         case 2:
-                al_draw_textf(font, al_map_rgb(0, 0, 0), LARGURA_TELA - 100, 10, ALLEGRO_ALIGN_RIGHT, "Tempo: %02d:%02d:%02d", horas, minutos, segundos);
-            if (podeJogar != 1) {
-                atualizarTabuleiro(jogo, tabuleiro);
-                al_draw_textf(font, al_map_rgb(0, 0, 0), LARGURA_TELA - 100, 10, ALLEGRO_ALIGN_RIGHT, "Tempo: %02d:%02d:%02d", horas, minutos, segundos);
-                al_flip_display();
-            }
-            if (situacaoDJogo) {
-                inicializarStruct(&podeAndarPosicoes, jogo);
-                inicializarStruct(&podeComerArcoPPosicoes, jogo);
-                inicializarStruct(&podeComerArcoGPosicoes, jogo);
+            inicializarStruct(&podeAndarPosicoes, jogo);
+            inicializarStruct(&podeComerArcoPPosicoes, jogo);
+            inicializarStruct(&podeComerArcoGPosicoes, jogo);
+            if (pecaEscolhida.i != -1) {
                 podeAndar(jogo, pecaEscolhida, &podeAndarPosicoes);
                 if (pecaEscolhida.i == 1 || pecaEscolhida.i == 4 || pecaEscolhida.j == 1 || pecaEscolhida.j == 4) {
                     verificarLivre(vetL, jogo, pecaEscolhida.i, pecaEscolhida.j);
@@ -831,31 +852,24 @@ int main()
                     verificarLivre(vetL, jogo, pecaEscolhida.i, pecaEscolhida.j);
                     podeComerArcoG(vetL, jogo, pecaEscolhida, &podeComerArcoGPosicoes);
                 }
-                for (int i = 0; i < 8; i++) {
-                    if (podeAndarPosicoes.i[i] != -1 && podeAndarPosicoes.j[i] != -1) {
-                        al_draw_filled_circle(175 + podeAndarPosicoes.j[i] * 87, 140 + podeAndarPosicoes.i[i] * 67, 30, corTrasparente);
-                        podeJogar = 1;
-                    }
-                    if (podeComerArcoPPosicoes.i[i] != - 1) {
-                        al_draw_filled_circle(175 + podeComerArcoPPosicoes.j[i] * 87, 140 + podeComerArcoPPosicoes.i[i] * 67, 30, corTrasparente);
-                        podeJogar = 1;
-                    }
-                    if (podeComerArcoGPosicoes.i[i] != - 1) {
-                        al_draw_filled_circle(175 + podeComerArcoGPosicoes.j[i] * 87, 140 + podeComerArcoGPosicoes.i[i] * 67, 30, corTrasparente);
-                        podeJogar = 1;
-                    }
-                }
-                if (podeJogar) {
-                    situacaoDJogo = 3;
-                } else {
-                    situacaoDJogo = 0;
-                }
-                al_flip_display();
             }
+            atualizarTabuleiro(jogo, tabuleiro, podeAndarPosicoes, podeComerArcoPPosicoes, podeComerArcoGPosicoes, corTrasparente, &podeJogar, situacaoDJogo);
+            
+            al_draw_textf(font, al_map_rgb(0, 0, 0), LARGURA_TELA - 100, 10, ALLEGRO_ALIGN_RIGHT, "Tempo: %02d:%02d:%02d", horas, minutos, segundos);
+            if (turno == 'R') {
+                al_draw_text(font, al_map_rgb(255, 0, 0), LARGURA_TELA - 150, 20, ALLEGRO_ALIGN_CENTER, "Turno do vermelho");
+            } else {
+                al_draw_text(font, al_map_rgb(0, 0, 255), LARGURA_TELA - 150, 20, ALLEGRO_ALIGN_CENTER, "Turno do azul");
+            }
+            if (!podeJogar)
+            {
+                situacaoDJogo = 0;
+            }
+            al_flip_display();
             break;
         case 6:
             al_clear_to_color(al_map_rgb(255, 255, 255));
-            if (turno == 'r') {
+            if (turno == 'R') {
                 al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5, ALLEGRO_ALIGN_CENTER, "Vermelho venceu!");
             } else {
                 al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5, ALLEGRO_ALIGN_CENTER, "Azul venceu!");
@@ -864,7 +878,6 @@ int main()
             al_draw_text(font, al_map_rgb(0, 0, 0), xBotao - 50, ALTURA_TELA / 4 + 70, ALLEGRO_ALIGN_CENTER, "Recomecar");
             al_draw_rectangle(xBotao + 100, yBotao, xBotao + 300, yBotao + 50, al_map_rgb(0, 0, 0), 2);
             al_draw_text(font, al_map_rgb(0, 0, 0), xBotao + 200, ALTURA_TELA / 4 + 70, ALLEGRO_ALIGN_CENTER, "Voltar ao menu");
-            
             al_flip_display();
             break;
         default:
@@ -878,5 +891,6 @@ int main()
     al_destroy_bitmap(tabuleiro);
     al_destroy_event_queue(fila_eventos);
     al_destroy_font(font);
+    al_destroy_timer(timer);
     return 0;
 }
