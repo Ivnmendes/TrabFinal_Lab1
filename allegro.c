@@ -602,9 +602,9 @@ void descobrirMovimentoPossivel (Peca jogo[TAM][TAM], Posicao *movimentoEcontrad
                 pecaAtual.i = i;
                 pecaAtual.j = j;
                 pecaAtual.time = 'B';
-                if (i == 1 || i == 4 || j == 1 || j == 4) { 
-                    verificarLivre(vetL, jogo, i, j); 
-                    podeComerArcoP(vetL, jogo, pecaAtual, &jogadaPossivel);
+                if (i == 2 || i == 3 || j == 2 || j == 3) {
+                    verificarLivre(vetL, jogo, i, j);
+                    podeComerArcoG(vetL, jogo, pecaAtual, &jogadaPossivel);
                 }
                 if (jogadaPossivel.i[0] != -1) {
                     achou = 1;
@@ -613,9 +613,9 @@ void descobrirMovimentoPossivel (Peca jogo[TAM][TAM], Posicao *movimentoEcontrad
                     posPecaJ = j;
                     break;
                 }
-                if (i == 2 || i == 3 || j == 2 || j == 3) {
-                    verificarLivre(vetL, jogo, i, j);
-                    podeComerArcoG(vetL, jogo, pecaAtual, &jogadaPossivel);
+                if (i == 1 || i == 4 || j == 1 || j == 4) { 
+                    verificarLivre(vetL, jogo, i, j); 
+                    podeComerArcoP(vetL, jogo, pecaAtual, &jogadaPossivel);
                 }
                 if (jogadaPossivel.i[0] != -1) {
                     achou = 1;
@@ -745,7 +745,7 @@ void descobrirMovimentoPossivel (Peca jogo[TAM][TAM], Posicao *movimentoEcontrad
 
     if (!achou) {
         for (int i = TAM - 1; i >= 0; i--) {
-            for (int j = TAM - 1; j >= TAM; j--) {
+            for (int j = TAM - 1; j >= 0; j--) {
                 if (jogo[i][j].time == 'B') {
                     inicializarStruct(&jogadaPossivel, jogo);
                     pecaAtual.i = i;
@@ -753,7 +753,6 @@ void descobrirMovimentoPossivel (Peca jogo[TAM][TAM], Posicao *movimentoEcontrad
                     pecaAtual.time = 'B';
                     podeAndar(jogo, pecaAtual, &jogadaPossivel);
                     if (jogadaPossivel.i[0] != -1) {
-                        printf("ou\n");
                         achou = 1;
                         posPecaI = i;
                         posPecaJ = j;
