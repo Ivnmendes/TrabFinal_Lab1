@@ -632,16 +632,18 @@ void descobrirMovimentoPossivel (Peca jogo[TAM][TAM], Posicao *movimentoEcontrad
     }
 
     if (!achou) {
-        for (int i = TAM; i >= 0; i--) {
-            for (int j = TAM; j >= 0; j--) {
+        for (int i = TAM - 1; i >= 0; i--) {
+            for (int j = TAM - 1; j >= 0; j--) {
+                if (achou) {
+                    break;
+                }
                 if (jogo[i][j].time == 'B') {
                     inicializarStruct(&jogadaPossivel, jogo);
                     pecaAtual.i = i;
                     pecaAtual.j = j;
                     pecaAtual.time = 'B';
-                    // podeAndar(jogo, pecaAtual, &jogadaPossivel);
                     if (i < 2 && j < 2) {
-                        for (int k = j-1; k < j+2; k++) {
+                        for (int k = j+1; k > j-2 && k >= 0; k--) {
                             if (jogo[i+1][k].time == '-') {
                                 jogadaPossivel.i[0] = i+1;
                                 jogadaPossivel.j[0] = k;
@@ -652,10 +654,10 @@ void descobrirMovimentoPossivel (Peca jogo[TAM][TAM], Posicao *movimentoEcontrad
                             }
                         }
                         if (!achou) {
-                            for (int k = i-1; k < i+2; k++) {
+                            for (int k = i+1; k > i-2 && k >= 0; k--) {
                                 if (jogo[k][j+1].time == '-') {
-                                    jogadaPossivel.i[0] = i+1;
-                                    jogadaPossivel.j[0] = k;
+                                    jogadaPossivel.i[0] = k;
+                                    jogadaPossivel.j[0] = j+1;
                                     achou = 1;
                                     posPecaI = i;
                                     posPecaJ = j;
@@ -664,7 +666,7 @@ void descobrirMovimentoPossivel (Peca jogo[TAM][TAM], Posicao *movimentoEcontrad
                             }
                         }
                     } else if (i < 2 && j > 3) {
-                        for (int k = j-1; k < j+2; k++) {
+                        for (int k = j-1; k < j+2 && k < TAM; k++) {
                             if (jogo[i+1][k].time == '-') {
                                 jogadaPossivel.i[0] = i+1;
                                 jogadaPossivel.j[0] = k;
@@ -675,10 +677,10 @@ void descobrirMovimentoPossivel (Peca jogo[TAM][TAM], Posicao *movimentoEcontrad
                             }
                         }
                         if (!achou) {
-                            for (int k = i-1; k < i+2; k++) {
+                            for (int k = i+1; k > i-2 && k >= 0; k--) {
                                 if (jogo[k][j-1].time == '-') {
-                                    jogadaPossivel.i[0] = i+1;
-                                    jogadaPossivel.j[0] = k;
+                                    jogadaPossivel.i[0] = k;
+                                    jogadaPossivel.j[0] = j-1;
                                     achou = 1;
                                     posPecaI = i;
                                     posPecaJ = j;
@@ -687,9 +689,9 @@ void descobrirMovimentoPossivel (Peca jogo[TAM][TAM], Posicao *movimentoEcontrad
                             }
                         }
                     } else if (i > 3 && j < 2) {
-                        for (int k = j-1; k < j+2; k++) {
+                        for (int k = j+1; k > j-2 && k >= 0; k--) {
                             if (jogo[i-1][k].time == '-') {
-                                jogadaPossivel.i[0] = i+1;
+                                jogadaPossivel.i[0] = i-1;
                                 jogadaPossivel.j[0] = k;
                                 achou = 1;
                                 posPecaI = i;
@@ -698,10 +700,10 @@ void descobrirMovimentoPossivel (Peca jogo[TAM][TAM], Posicao *movimentoEcontrad
                             }
                         }
                         if (!achou) {
-                            for (int k = i-1; k < i+2; k++) {
+                            for (int k = i+1; k > i-2 && k < TAM; k--) {
                                 if (jogo[k][j+1].time == '-') {
-                                    jogadaPossivel.i[0] = i+1;
-                                    jogadaPossivel.j[0] = k;
+                                    jogadaPossivel.i[0] = k;
+                                    jogadaPossivel.j[0] = j+1;
                                     achou = 1;
                                     posPecaI = i;
                                     posPecaJ = j;
@@ -710,9 +712,9 @@ void descobrirMovimentoPossivel (Peca jogo[TAM][TAM], Posicao *movimentoEcontrad
                             }
                         }
                     } else if (i > 3 && j > 3) {
-                        for (int k = j-1; k < j+2; k++) {
+                        for (int k = j+1; k > j-2 && k < TAM; k--) {
                             if (jogo[i-1][k].time == '-') {
-                                jogadaPossivel.i[0] = i+1;
+                                jogadaPossivel.i[0] = i-1;
                                 jogadaPossivel.j[0] = k;
                                 achou = 1;
                                 posPecaI = i;
@@ -721,10 +723,10 @@ void descobrirMovimentoPossivel (Peca jogo[TAM][TAM], Posicao *movimentoEcontrad
                             }
                         }
                         if (!achou) {
-                            for (int k = i-1; k < i+2; k++) {
+                            for (int k = i+1; k > i-2 && k < TAM; k--) {
                                 if (jogo[k][j-1].time == '-') {
-                                    jogadaPossivel.i[0] = i+1;
-                                    jogadaPossivel.j[0] = k;
+                                    jogadaPossivel.i[0] = k;
+                                    jogadaPossivel.j[0] = j-1;
                                     achou = 1;
                                     posPecaI = i;
                                     posPecaJ = j;
@@ -732,26 +734,18 @@ void descobrirMovimentoPossivel (Peca jogo[TAM][TAM], Posicao *movimentoEcontrad
                                 }
                             }
                         }
-                    } else {
-                        podeAndar(jogo, pecaAtual, &jogadaPossivel);
-                        if (jogadaPossivel.i[0] != -1) {
-                            achou = 1;
-                            posPecaI = i;
-                            posPecaJ = j;
-                            break;
-                        }
                     }
                 }
             }
-            if (achou == 1) {
+            if (achou) {
                 break;
             }
         }
     }
 
     if (!achou) {
-        for (int i = TAM; i >= 0; i--) {
-            for (int j = TAM; j >= TAM; j--) {
+        for (int i = TAM - 1; i >= 0; i--) {
+            for (int j = TAM - 1; j >= TAM; j--) {
                 if (jogo[i][j].time == 'B') {
                     inicializarStruct(&jogadaPossivel, jogo);
                     pecaAtual.i = i;
@@ -759,6 +753,7 @@ void descobrirMovimentoPossivel (Peca jogo[TAM][TAM], Posicao *movimentoEcontrad
                     pecaAtual.time = 'B';
                     podeAndar(jogo, pecaAtual, &jogadaPossivel);
                     if (jogadaPossivel.i[0] != -1) {
+                        printf("ou\n");
                         achou = 1;
                         posPecaI = i;
                         posPecaJ = j;
@@ -846,7 +841,7 @@ int main()
         return -1;
     }
 
-    //apagar dps
+    // Instala teclado
     al_install_keyboard();
     if (!al_install_keyboard()) {
         printf("Falha ao inicializar o teclado");
@@ -959,7 +954,7 @@ int main()
                         horas = 0;
                     }
 
-                    if (vezDoComputador == 1 && tempoDeEspera <= 2) {
+                    if (vezDoComputador == 1 && tempoDeEspera <= 1) {
                         tempoDeEspera++;
                     }
             }
@@ -967,6 +962,7 @@ int main()
             if (situacao == 1 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
                 if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 200 && evento.mouse.y >= yBotao && evento.mouse.y <= yBotao + 50) {
                     limpaTela();
+                    turno = 'R';
                     situacao = 2;
                     iniciarTabuleiro(jogo);
                     rodada = 0;
@@ -983,6 +979,7 @@ int main()
                 }
                 else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 200 && evento.mouse.y >= yBotao + 80 && evento.mouse.y <= yBotao + 130) {
                     limpaTela();
+                    turno = 'R';
                     situacao = 3;
                     iniciarTabuleiro(jogo);
                     rodada = 0;
@@ -1135,6 +1132,7 @@ int main()
                 if (evento.mouse.y >= yBotao && evento.mouse.y <= yBotao + 50) {
                     if (evento.mouse.x >= xBotao - 150 && evento.mouse.x <= xBotao + 50) {
                         limpaTela();
+                        turno = 'R';
                         situacao = situacaoAux;
                         iniciarTabuleiro(jogo);
                         rodada = 0;
@@ -1192,7 +1190,7 @@ int main()
             if (!vezDoComputador) {
                 jogadaPossivel(&podeAndarPosicoes, &podeComerArcoPPosicoes, &podeComerArcoGPosicoes, vetL, jogo, pecaEscolhida, podeJogar, &situacaoDJogo);
             } else {
-                if (tempoDeEspera > 2) {
+                if (tempoDeEspera > 1) {
                     inicializarStruct(&jogadaDoComputador, jogo);
                     descobrirMovimentoPossivel(jogo, &jogadaDoComputador, &matou);
                     movimento (jogo, jogadaDoComputador.i[1], jogadaDoComputador.j[1], jogadaDoComputador.i[0], jogadaDoComputador.j[0]);
