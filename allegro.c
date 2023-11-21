@@ -1599,6 +1599,13 @@ int main()
                     }
                 }
             }
+
+            if (situacao == 5 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+                if (evento.mouse.x >= 50 - 40 && evento.mouse.x <= 50 + 40 && evento.mouse.y >= 50 - 40 && evento.mouse.y <= 50 + 40) {
+                    situacao = 1;
+                }
+            }
+            
             if (situacao == 6 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
                 if (evento.mouse.y >= yBotao + 20 && evento.mouse.y <= yBotao + 100) {
                     if (evento.mouse.x >= xBotao - 180 && evento.mouse.x <= xBotao + 70) {
@@ -1824,6 +1831,24 @@ int main()
                     al_flip_display();
                     break;
             }
+            break;
+        case 5:
+            al_clear_to_color(al_map_rgb(255, 255, 255));
+            al_draw_text(fontTitulo, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 25, ALLEGRO_ALIGN_CENTER, "Historico");
+            al_draw_text(font, al_map_rgb(0, 0, 0), 100, ALTURA_TELA / 5, ALLEGRO_ALIGN_LEFT, "Jogador x Jogador");
+            al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA - 50, ALTURA_TELA / 5, ALLEGRO_ALIGN_RIGHT, "Jogador x Computador");
+            al_draw_line(70, ALTURA_TELA / 5 + 35, LARGURA_TELA / 2 - 85, ALTURA_TELA / 5 + 35, al_map_rgb(0, 0, 0), 4);
+            al_draw_line(LARGURA_TELA - 585, ALTURA_TELA / 5 + 35, LARGURA_TELA - 35, ALTURA_TELA / 5 + 35, al_map_rgb(0, 0, 0), 4);
+            al_draw_line(LARGURA_TELA / 2, ALTURA_TELA / 25 + 80, LARGURA_TELA / 2, ALTURA_TELA - 100, al_map_rgb(0, 0, 0), 4);
+            for (int i = 0; i < 5; i++) {
+                al_draw_textf(font, al_map_rgb(100, 100, 100), 30, ALTURA_TELA / 5 + 70 + 80 * i, ALLEGRO_ALIGN_LEFT, "%d.", i + 1);
+                al_draw_textf(font, al_map_rgb(100, 100, 100), LARGURA_TELA / 2 + 30, ALTURA_TELA / 5 + 70 + 80 * i, ALLEGRO_ALIGN_LEFT, "%d.", i + 1);
+            }
+
+            al_draw_circle(50, 50, 40, al_map_rgb(0, 0, 0), 3);
+            al_draw_line(30, 30, 70, 70, al_map_rgb(0, 0, 0), 3);
+            al_draw_line(30, 70, 70, 30, al_map_rgb(0, 0, 0), 3);
+            al_flip_display();
             break;
         case 6:
             al_clear_to_color(al_map_rgb(255, 255, 255));
