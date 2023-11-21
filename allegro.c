@@ -606,7 +606,7 @@ void exibirJogo (Peca jogo[TAM][TAM], Posicao podeAndarPosicoes, Posicao podeCom
         al_draw_line(810, 143+y, 790, 143+y, al_map_rgb(0, 0, 0), 4);
         al_draw_textf(font, al_map_rgb(0, 0, 0), 830, 135+y, ALLEGRO_ALIGN_CENTER, "%d", i);
     }
-    al_flip_display();
+    //al_flip_display();
 }
 
 void descobrirMovimentoPossivel (Peca jogo[TAM][TAM], Posicao *movimentoEcontrado, int *matou, int dica, char time) {
@@ -1148,7 +1148,11 @@ int main()
     ALLEGRO_DISPLAY *janela = NULL;
     ALLEGRO_FONT *font = NULL;
     ALLEGRO_FONT *fontTitulo = NULL;
+    ALLEGRO_FONT *fontTexto = NULL;
     ALLEGRO_BITMAP *tabuleiro = NULL;
+    ALLEGRO_BITMAP *tabuleiroExemplo = NULL;
+    ALLEGRO_BITMAP *capturaExemplo = NULL;
+    ALLEGRO_BITMAP *capturaExemplo2 = NULL;
     ALLEGRO_EVENT_QUEUE *fila_eventos = NULL;
     ALLEGRO_TIMER *timer = NULL;
 
@@ -1210,7 +1214,6 @@ int main()
 
     // Carregando a fonte
     font = al_load_font("./font.ttf", 30, 0);
-    //font = al_create_builtin_font();
     if (!font) {
         printf("Falha ao carregar \"font.ttf\".\n");
         return -1;
@@ -1222,10 +1225,34 @@ int main()
         return -1;
     }
 
+    fontTexto = al_load_font("./font.ttf", 15, 0);
+    if (!fontTexto) {
+        printf("Falha ao carregar \"font.ttf\".\n");
+        return -1;
+    }
+
     // Carregando a imagem do tabuleiro
     tabuleiro = al_load_bitmap("./tabuleiro.png");
     if (!tabuleiro) {
         printf("Falha ao carregar \"tabuleiro.png\".\n");
+        return -1;
+    }
+
+    tabuleiroExemplo = al_load_bitmap("./tabsurakartaexemplo.png");
+    if (!tabuleiroExemplo) {
+        printf("Falha ao carregar \"tabsurakartaexemplo.png\".\n");
+        return -1;
+    }
+
+    capturaExemplo = al_load_bitmap("./exemploCaptura.png");
+    if (!capturaExemplo) {
+        printf("Falha ao carregar \"exemploCaptura.png\".\n");
+        return -1;
+    }
+
+    capturaExemplo2 = al_load_bitmap("./exemploCaptura2.png");
+    if (!capturaExemplo2) {
+        printf("Falha ao carregar \"exemploCaptura2.png\".\n");
         return -1;
     }
 
@@ -1236,6 +1263,7 @@ int main()
         return -1;
     }
 
+    al_set_blender(ALLEGRO_ADD, ALLEGRO_ALPHA, ALLEGRO_INVERSE_ALPHA);
 
     // Registrando os eventos da janela principal e do mouse
     al_register_event_source(fila_eventos, al_get_display_event_source(janela));
@@ -1253,7 +1281,8 @@ int main()
     int xBotao = LARGURA_TELA / 2 - 140, yBotao = ALTURA_TELA / 4 + 50;
     ALLEGRO_COLOR corVermelhoPeca = al_map_rgb(255, 0, 0);
     ALLEGRO_COLOR corAzulPeca = al_map_rgb(0, 0, 255);
-    ALLEGRO_COLOR corTrasparente = al_map_rgba(255, 200, 0, 100);
+    ALLEGRO_COLOR corTrasparente = al_map_rgba_f(1, 1, 0, 0.7);
+    ALLEGRO_COLOR corBrancoTrasparente = al_map_rgba_f(1, 1, 1, 0.8);
 
     // Variaveis do jogo - flags
     int rodando = 1, situacao = 1, situacaoAux, situacaoDJogo = 0, podeJogar = 0;
@@ -1267,6 +1296,7 @@ int main()
     int vetL[4];
     int op;
     int vezDoComputador = 0, matou, dica;
+    int pagAjuda;
     
     Peca jogo[TAM][TAM];
     Peca pecaEscolhida;
@@ -1366,6 +1396,7 @@ int main()
                     al_rest(timeSleep);
                 } else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 280 && evento.mouse.y >= yBotao + 180 && evento.mouse.y <= yBotao + 250) {
                     situacao = 4;
+                    pagAjuda = 1;
                     al_rest(timeSleep);
                 } else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 280 && evento.mouse.y >= yBotao + 270 && evento.mouse.y <= yBotao + 340) {
                     situacao = 5;
@@ -1552,6 +1583,19 @@ int main()
                 }
             }
             
+            if (situacao == 4 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+                if (evento.mouse.y >= ALTURA_TELA - 50 - 40 && evento.mouse.y <= ALTURA_TELA - 50 + 40) {
+                    if (evento.mouse.x >= 50 - 40 && evento.mouse.x <= 50 + 40) {
+                        pagAjuda--;
+                    } else if (evento.mouse.x >= LARGURA_TELA - 50 - 40 && evento.mouse.x <= LARGURA_TELA + 50 + 40) {
+                        pagAjuda++;
+                    }
+                    
+                    if (pagAjuda < 1 || pagAjuda > 5) {
+                        situacao = 1;
+                    }
+                }
+            }
             if (situacao == 6 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
                 if (evento.mouse.y >= yBotao + 20 && evento.mouse.y <= yBotao + 100) {
                     if (evento.mouse.x >= xBotao - 180 && evento.mouse.x <= xBotao + 70) {
@@ -1586,6 +1630,19 @@ int main()
                     al_rest(timeSleep);
                 }
             }
+
+            if (situacao == 7 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+                if (evento.mouse.x >= xBotao && evento.mouse.x < xBotao + 280) {
+                    if (evento.mouse.y >= yBotao && evento.mouse.y <= yBotao + 70) {
+                        situacao = situacaoAux;
+                    } else if (evento.mouse.y >= yBotao + 90 && evento.mouse.y <= yBotao + 160) {
+
+                    } else if (evento.mouse.y >= yBotao + 180 && evento.mouse.y <= yBotao + 250) {
+                        situacao = 1;
+                        situacaoAux = 1;
+                    }
+                }
+            }
         }
         switch (situacao)
         {
@@ -1612,10 +1669,12 @@ int main()
             break;
         case 2:    
             exibirJogo(jogo, podeAndarPosicoes, podeComerArcoPPosicoes, podeComerArcoGPosicoes, movDica, tabuleiro, font, horas, minutos, segundos, turno, corTrasparente, vezDoComputador, situacaoDJogo, &podeJogar, totDicasV, totDicasA, dica);
+            al_flip_display();
             jogadaPossivel(&podeAndarPosicoes, &podeComerArcoPPosicoes, &podeComerArcoGPosicoes, vetL, jogo, pecaEscolhida, podeJogar, &situacaoDJogo);           
             break;
         case 3:  
             exibirJogo(jogo, podeAndarPosicoes, podeComerArcoPPosicoes, podeComerArcoGPosicoes, movDica, tabuleiro, font, horas, minutos, segundos, turno, corTrasparente, vezDoComputador, situacaoDJogo, &podeJogar, totDicasV, totDicasA, dica);
+            al_flip_display();
             if (!vezDoComputador) {
                 jogadaPossivel(&podeAndarPosicoes, &podeComerArcoPPosicoes, &podeComerArcoGPosicoes, vetL, jogo, pecaEscolhida, podeJogar, &situacaoDJogo);
             } else {
@@ -1645,6 +1704,124 @@ int main()
                 }
             }       
             break;
+        case 4:
+            switch (pagAjuda) {
+                case 1:
+                    al_clear_to_color(al_map_rgb(255, 255, 255));
+                    al_draw_text(fontTitulo, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5 - 100, ALLEGRO_ALIGN_CENTER, "O que e surakarta?");
+                    al_draw_text(fontTexto, al_map_rgb(100, 100, 100), 30, ALTURA_TELA / 5, ALLEGRO_ALIGN_LEFT, "Surakarta e um jogo de tabuleiro, para 2 pessoas. O jogo possui algumas caracteristicas comuns com o"); 
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 20, ALLEGRO_ALIGN_LEFT, "xadrez, como as pecas se moverem como o rei (horizontal, vertical, diagonal, mas apenas uma casa por lance)");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 40, ALLEGRO_ALIGN_LEFT, "e a captura ser por substituicao, ou seja, a peca que captura move-se para a casa da peca capturada. Porem, o ");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 60, ALLEGRO_ALIGN_LEFT, "criterio exigido para que uma captura seja permitida e original, conforme sera explicado mais adiante.");
+
+                    al_draw_circle(50, ALTURA_TELA - 50, 40, al_map_rgb(0, 0, 0), 3);
+                    al_draw_filled_triangle(30, ALTURA_TELA - 50, 70, ALTURA_TELA - 30, 70, ALTURA_TELA - 70, al_map_rgb(0, 0, 0));
+                    al_draw_circle(LARGURA_TELA - 50, ALTURA_TELA - 50, 40, al_map_rgb(0, 0, 0), 3);
+                    al_draw_filled_triangle(LARGURA_TELA - 30, ALTURA_TELA - 50, LARGURA_TELA - 70, ALTURA_TELA - 30, LARGURA_TELA - 70, ALTURA_TELA - 70, al_map_rgb(0, 0, 0));
+
+                    al_flip_display();
+                    break;
+                case 2:
+                    al_clear_to_color(al_map_rgb(255, 255, 255));
+                    al_draw_text(fontTitulo, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5 - 100, ALLEGRO_ALIGN_CENTER, "Tabuleiro");
+
+                    al_draw_bitmap(tabuleiroExemplo, LARGURA_TELA / 2 - 110, ALTURA_TELA / 5 - 30, 0);
+
+                    al_draw_text(fontTexto, al_map_rgb(100, 100, 100), 30, ALTURA_TELA / 5 + 220, ALLEGRO_ALIGN_LEFT, "O jogo e composto por um tabuleiro (matriz 6x6) que possui dois circuitos de 3/4 de circunferencia (circuito"); 
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 240, ALLEGRO_ALIGN_LEFT, "interno e externo) em cada um dos quatro cantos do tabuleiro, e cujo percurso e obrigatorio no momento da ");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 260, ALLEGRO_ALIGN_LEFT, "captura. Cada jogador dispoe inicialmente de 12 pecas. A posicao inicial e a que se ve na imagem acima. As pecas ");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 280, ALLEGRO_ALIGN_LEFT, "sao posicionadas nas intersecoes das linhas (pontos) e nao no centro dos quadrados por elas formados.");
+
+                    al_draw_circle(50, ALTURA_TELA - 50, 40, al_map_rgb(0, 0, 0), 3);
+                    al_draw_filled_triangle(30, ALTURA_TELA - 50, 70, ALTURA_TELA - 30, 70, ALTURA_TELA - 70, al_map_rgb(0, 0, 0));
+                    al_draw_circle(LARGURA_TELA - 50, ALTURA_TELA - 50, 40, al_map_rgb(0, 0, 0), 3);
+                    al_draw_filled_triangle(LARGURA_TELA - 30, ALTURA_TELA - 50, LARGURA_TELA - 70, ALTURA_TELA - 30, LARGURA_TELA - 70, ALTURA_TELA - 70, al_map_rgb(0, 0, 0));
+
+                    al_flip_display();
+                    break;
+                case 3:
+                    al_clear_to_color(al_map_rgb(255, 255, 255));
+                    al_draw_text(fontTitulo, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5 - 100, ALLEGRO_ALIGN_CENTER, "O Jogo");
+
+                    al_draw_text(fontTexto, al_map_rgb(100, 100, 100), 30, ALTURA_TELA / 5, ALLEGRO_ALIGN_LEFT, "O objetivo do jogo e capturar todas as pecas do adversario ou ter um maior numero de pecas caso mais"); 
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 20, ALLEGRO_ALIGN_LEFT, "nenhuma peca puder ser capturada.");
+                    
+                    al_draw_circle(50, ALTURA_TELA - 50, 40, al_map_rgb(0, 0, 0), 3);
+                    al_draw_filled_triangle(30, ALTURA_TELA - 50, 70, ALTURA_TELA - 30, 70, ALTURA_TELA - 70, al_map_rgb(0, 0, 0));
+                    al_draw_circle(LARGURA_TELA - 50, ALTURA_TELA - 50, 40, al_map_rgb(0, 0, 0), 3);
+                    al_draw_filled_triangle(LARGURA_TELA - 30, ALTURA_TELA - 50, LARGURA_TELA - 70, ALTURA_TELA - 30, LARGURA_TELA - 70, ALTURA_TELA - 70, al_map_rgb(0, 0, 0));
+
+                    al_flip_display();
+                    break;
+                case 4:
+                    al_clear_to_color(al_map_rgb(255, 255, 255));
+                    al_draw_text(fontTitulo, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5 - 100, ALLEGRO_ALIGN_CENTER, "Movimento");
+                    al_draw_text(fontTexto, al_map_rgb(100, 100, 100), 30, ALTURA_TELA / 5, ALLEGRO_ALIGN_LEFT, "Os adversarios se alternam fazendo um lance por vez. O movimento de um jogador consiste em andar com uma de suas"); 
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 20, ALLEGRO_ALIGN_LEFT, "pecas, apenas uma casa por vez, em qualquer direcao, na horizontal, vertical, diagonal, para frente ou para ");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 40, ALLEGRO_ALIGN_LEFT, "tras, porem nao e possivel caminhar pelos circulos nos cantos do tabuleiro, a menos que seja para capturar");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 60, ALLEGRO_ALIGN_LEFT, "uma peca do adversario. Nao e permitido saltar unidades proprias ou adversarias. Tambem nao se pode invadir um");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 80, ALLEGRO_ALIGN_LEFT, "ponto ja ocupado, exceto para fazer uma captura, situacao em que a peca atacada e removida definitivamente do ");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 100, ALLEGRO_ALIGN_LEFT, "tabuleiro.");
+
+                    al_draw_circle(50, ALTURA_TELA - 50, 40, al_map_rgb(0, 0, 0), 3);
+                    al_draw_filled_triangle(30, ALTURA_TELA - 50, 70, ALTURA_TELA - 30, 70, ALTURA_TELA - 70, al_map_rgb(0, 0, 0));
+                    al_draw_circle(LARGURA_TELA - 50, ALTURA_TELA - 50, 40, al_map_rgb(0, 0, 0), 3);
+                    al_draw_filled_triangle(LARGURA_TELA - 30, ALTURA_TELA - 50, LARGURA_TELA - 70, ALTURA_TELA - 30, LARGURA_TELA - 70, ALTURA_TELA - 70, al_map_rgb(0, 0, 0));
+
+                    al_flip_display();
+                    break;
+                case 5:
+                    al_clear_to_color(al_map_rgb(255, 255, 255));
+                    al_draw_text(fontTitulo, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5 - 100, ALLEGRO_ALIGN_CENTER, "Captura");
+                    al_draw_text(fontTexto, al_map_rgb(100, 100, 100), 30, ALTURA_TELA / 5, ALLEGRO_ALIGN_LEFT, "Um movimento de captura consiste em percorrer um circuito interno ou externo em torno de pelo menos"); 
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 20, ALLEGRO_ALIGN_LEFT, "um dos oito cantos do tabuleiro, seguido de pousar em uma peca adversaria, capturando-a. AS pecas capturadas");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 40, ALLEGRO_ALIGN_LEFT, "Sao removidas do jogo.");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 30, ALTURA_TELA / 5 + 60, ALLEGRO_ALIGN_LEFT, "Assim, para caputar uma peca adversaria, e necessario mover a sua e coloca-la no lugar dela, passando");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 80, ALLEGRO_ALIGN_LEFT, "pelo menos uma vez, por um dos circuitos dos cantos do tabuleiro. Para a captura, e somente nessa hipotese, a ");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 100, ALLEGRO_ALIGN_LEFT, "peca atacante pode percorrer qualquer numero de posicoes vagas, mas apenas no sentido horizontal ou vertical.");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 30, ALTURA_TELA / 5 + 120, ALLEGRO_ALIGN_LEFT, "Conforme mencionado, a peca atacante deve passar obrigatoriamente, pelo menos uma vez, por um dos oito ");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 140, ALLEGRO_ALIGN_LEFT, "circuitos localizados nos cantos do tabuleiro, terminando o movimento na posicao onde se encontra a peca a ser");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 160, ALLEGRO_ALIGN_LEFT, "Capturada. Vale passar por mais de um circuito para fazer uma captura, mas, como nos movimentos normais, aqui");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 180, ALLEGRO_ALIGN_LEFT, "tambem nao se permitem saltos sobre pecas. E importante notar que as capturas nao sao obrigatorias. A Figura");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 200, ALLEGRO_ALIGN_LEFT, "a seguir mostra o movimento realizado na captura.");
+
+                    al_draw_bitmap(capturaExemplo, LARGURA_TELA / 2 - 110, ALTURA_TELA / 5 + 230, 0);
+
+                    al_draw_circle(50, ALTURA_TELA - 50, 40, al_map_rgb(0, 0, 0), 3);
+                    al_draw_filled_triangle(30, ALTURA_TELA - 50, 70, ALTURA_TELA - 30, 70, ALTURA_TELA - 70, al_map_rgb(0, 0, 0));
+                    al_draw_circle(LARGURA_TELA - 50, ALTURA_TELA - 50, 40, al_map_rgb(0, 0, 0), 3);
+                    al_draw_filled_triangle(LARGURA_TELA - 30, ALTURA_TELA - 50, LARGURA_TELA - 70, ALTURA_TELA - 30, LARGURA_TELA - 70, ALTURA_TELA - 70, al_map_rgb(0, 0, 0));
+
+                    al_flip_display();
+                    break;
+                case 6:
+                    al_clear_to_color(al_map_rgb(255, 255, 255));
+                    al_draw_text(fontTitulo, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5 - 100, ALLEGRO_ALIGN_CENTER, "Captura");
+                    al_draw_text(fontTexto, al_map_rgb(100, 100, 100), 30, ALTURA_TELA / 5, ALLEGRO_ALIGN_LEFT, "Os circuitos de canto sao usados somente ao fazer uma captura. A peca de captura entra e sai do circuito"); 
+                    al_draw_text(fontTexto, al_map_rgb(100, 100, 100), 3, ALTURA_TELA / 5 + 20, ALLEGRO_ALIGN_LEFT, "atraves de uma linha grade tangente ao circulo. Qualquer numero de pontos desocupados pode ser percorrida");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 40, ALLEGRO_ALIGN_LEFT, "mais de uma vez durante a jornada da peca de captura. Somente posicoes desocupadas poderao ser percorridas.");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 30, ALTURA_TELA / 5 + 60, ALLEGRO_ALIGN_LEFT, "A figura a seguir ilustra um exemplo de captura. No exemplo, o tabuleiro esta com apenas tres pecas, duas ");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 80, ALLEGRO_ALIGN_LEFT, "brancas, localizadas em B1 e E2, e uma preta, situada em E3, Se fosse a vez das pretas, a peca em E3 poderia subir, dar a volta pelo circuito interno superior");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 100, ALLEGRO_ALIGN_LEFT, "volta pelo circuito interno superior direito, prosseguir pela linha 5, passar pelo circuito interno superior");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 120, ALLEGRO_ALIGN_LEFT, "esquerdo, e descer pela coluna B, capturando a peca em B1. Nao daria para fazer a captura atraves do circuito inferior");
+                    al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 140, ALLEGRO_ALIGN_LEFT, "direito, pois o trajeto  estaria obstruido pela peca em E2.");
+
+                    al_draw_bitmap(capturaExemplo2, LARGURA_TELA / 2 - 110, ALTURA_TELA / 5 + 170, 0);
+
+                    al_draw_circle(50, ALTURA_TELA - 50, 40, al_map_rgb(0, 0, 0), 3);
+                    al_draw_filled_triangle(30, ALTURA_TELA - 50, 70, ALTURA_TELA - 30, 70, ALTURA_TELA - 70, al_map_rgb(0, 0, 0));
+                    al_draw_circle(LARGURA_TELA - 50, ALTURA_TELA - 50, 40, al_map_rgb(0, 0, 0), 3);
+                    al_draw_filled_triangle(LARGURA_TELA - 30, ALTURA_TELA - 50, LARGURA_TELA - 70, ALTURA_TELA - 30, LARGURA_TELA - 70, ALTURA_TELA - 70, al_map_rgb(0, 0, 0));
+
+                    al_flip_display();
+                    break;
+                default:
+                    al_clear_to_color(al_map_rgb(255, 0, 0));
+                    al_draw_text(font, al_map_rgb(255, 255, 255), LARGURA_TELA / 2, ALTURA_TELA / 2, ALLEGRO_ALIGN_CENTER, "Erro");
+                    al_flip_display();
+                    break;
+            }
+            break;
         case 6:
             al_clear_to_color(al_map_rgb(255, 255, 255));
             if (turno == 'R') {
@@ -1663,10 +1840,19 @@ int main()
             al_flip_display();
             break;
         case 7:
-            al_draw_rectangle(xBotao - 181, yBotao - 1, xBotao + 72, yBotao + 52, al_map_rgb(0, 0, 0), 2);
-            al_draw_filled_rectangle(xBotao - 180, yBotao, xBotao + 70, yBotao + 50, al_map_rgb(255, 255, 255));   
-            al_draw_text(font, al_map_rgb(0, 0, 0), xBotao - 50, ALTURA_TELA / 4 + 70, ALLEGRO_ALIGN_CENTER, "Jogo Pausado");
-            al_draw_text(font, al_map_rgb(0, 0, 0), xBotao - 50, ALTURA_TELA / 4 + 80, ALLEGRO_ALIGN_CENTER, "Pressione esc para continuar");
+            al_clear_to_color(al_map_rgb(255, 255, 255));
+            exibirJogo(jogo, podeAndarPosicoes, podeComerArcoPPosicoes, podeComerArcoGPosicoes, movDica, tabuleiro, font, horas, minutos, segundos, turno, corTrasparente, vezDoComputador, situacaoDJogo, &podeJogar, totDicasV, totDicasA, dica);
+            al_draw_filled_rectangle(0, 0, LARGURA_TELA, ALTURA_TELA, corBrancoTrasparente);
+            al_draw_text(fontTitulo, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5, ALLEGRO_ALIGN_CENTER, "Jogo Pausado");
+
+            al_draw_rectangle(xBotao, yBotao, xBotao + 280, yBotao + 70, al_map_rgb(0, 0, 0), 2);
+            al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 4 + 70, ALLEGRO_ALIGN_CENTER, "Voltar");
+
+            al_draw_rectangle(xBotao, yBotao + 90, xBotao + 280, yBotao + 160, al_map_rgb(0, 0, 0), 2);
+            al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 4 + 160, ALLEGRO_ALIGN_CENTER, "Salvar");
+
+            al_draw_rectangle(xBotao, yBotao + 180, xBotao + 280, yBotao + 250, al_map_rgb(0, 0, 0), 2);
+            al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 4 + 250, ALLEGRO_ALIGN_CENTER, "Menu");
             al_flip_display();
             break;
         default:
