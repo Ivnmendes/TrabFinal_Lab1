@@ -48,6 +48,7 @@
 # Exe
 *.exe
 logica
+allegro
 
 # Kernel Module Compile Results
 *.mod*

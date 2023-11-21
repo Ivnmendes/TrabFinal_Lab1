@@ -1213,44 +1213,43 @@ int main()
     al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
 
     // Carregando a fonte
-    font = al_load_font("./font.ttf", 30, 0);
+    font = al_load_font("./source/font.ttf", 30, 0);
     if (!font) {
         printf("Falha ao carregar \"font.ttf\".\n");
         return -1;
     }
 
-    fontTitulo = al_load_font("./font.ttf", 50, 0);
+    fontTitulo = al_load_font("./source/font.ttf", 50, 0);
     if (!fontTitulo) {
         printf("Falha ao carregar \"font.ttf\".\n");
         return -1;
     }
-
-    fontTexto = al_load_font("./font.ttf", 15, 0);
+    fontTexto = al_load_font("./source/font.ttf", 15, 0);
     if (!fontTexto) {
         printf("Falha ao carregar \"font.ttf\".\n");
         return -1;
     }
 
     // Carregando a imagem do tabuleiro
-    tabuleiro = al_load_bitmap("./tabuleiro.png");
+    tabuleiro = al_load_bitmap("./source/tabuleiro.png");
     if (!tabuleiro) {
         printf("Falha ao carregar \"tabuleiro.png\".\n");
         return -1;
     }
 
-    tabuleiroExemplo = al_load_bitmap("./tabsurakartaexemplo.png");
+    tabuleiroExemplo = al_load_bitmap("./source/tabsurakartaexemplo.png");
     if (!tabuleiroExemplo) {
         printf("Falha ao carregar \"tabsurakartaexemplo.png\".\n");
         return -1;
     }
 
-    capturaExemplo = al_load_bitmap("./exemploCaptura.png");
+    capturaExemplo = al_load_bitmap("./source/exemploCaptura.png");
     if (!capturaExemplo) {
         printf("Falha ao carregar \"exemploCaptura.png\".\n");
         return -1;
     }
 
-    capturaExemplo2 = al_load_bitmap("./exemploCaptura2.png");
+    capturaExemplo2 = al_load_bitmap("./source/exemploCaptura2.png");
     if (!capturaExemplo2) {
         printf("Falha ao carregar \"exemploCaptura2.png\".\n");
         return -1;
@@ -1340,6 +1339,10 @@ int main()
             if (evento.type == ALLEGRO_EVENT_KEY_DOWN) {
                 if (evento.keyboard.keycode == ALLEGRO_KEY_ESCAPE && situacao == 7) {
                     situacao = situacaoAux;
+                    al_rest(timeSleep);
+                } else if (evento.keyboard.keycode == ALLEGRO_KEY_ESCAPE && (situacao == 2 || (situacao == 3 && vezDoComputador == 0))) {
+                    situacao = 7;
+                    al_rest(timeSleep);
                 }
                 if (evento.keyboard.keycode == ALLEGRO_KEY_TAB) {
                     situacao = 6;
@@ -1591,7 +1594,7 @@ int main()
                         pagAjuda++;
                     }
                     
-                    if (pagAjuda < 1 || pagAjuda > 5) {
+                    if (pagAjuda < 1 || pagAjuda > 6) {
                         situacao = 1;
                     }
                 }
