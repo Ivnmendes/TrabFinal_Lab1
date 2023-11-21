@@ -6,6 +6,7 @@
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_ttf.h>
 
 #define LARGURA_TELA 1280
 #define ALTURA_TELA 720
@@ -578,21 +579,21 @@ void exibirJogo (Peca jogo[TAM][TAM], Posicao podeAndarPosicoes, Posicao podeCom
     int auxPodeJogar = *podeJogar;
     atualizarTabuleiro(jogo, tabuleiro, podeAndarPosicoes, podeComerArcoPPosicoes, podeComerArcoGPosicoes, movDica, corTrasparente, &auxPodeJogar, situacaoDJogo, dica);
     *podeJogar = auxPodeJogar;
-    al_draw_textf(font, al_map_rgb(0, 0, 0), LARGURA_TELA - 100, 10, ALLEGRO_ALIGN_RIGHT, "Tempo: %02d:%02d:%02d", horas, minutos, segundos);
+    al_draw_textf(font, al_map_rgb(0, 0, 0), LARGURA_TELA, 10, ALLEGRO_ALIGN_RIGHT, "Tempo: %02d:%02d:%02d", horas, minutos, segundos);
     
-    al_draw_rectangle(LARGURA_TELA - 150, ALTURA_TELA - 240, LARGURA_TELA, ALTURA_TELA - 170, al_map_rgb(0, 0, 0), 2);
-    al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA - 75, ALTURA_TELA - 220, ALLEGRO_ALIGN_CENTER, "Dica");
-    al_draw_rectangle(LARGURA_TELA - 150, ALTURA_TELA - 150, LARGURA_TELA, ALTURA_TELA - 80, al_map_rgb(0, 0, 0), 2);
-    al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA - 75, ALTURA_TELA - 130, ALLEGRO_ALIGN_CENTER, "Pausar");
+    al_draw_rectangle(LARGURA_TELA - 190, ALTURA_TELA - 240, LARGURA_TELA, ALTURA_TELA - 170, al_map_rgb(0, 0, 0), 2);
+    al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA - 95, ALTURA_TELA - 220, ALLEGRO_ALIGN_CENTER, "Dica");
+    al_draw_rectangle(LARGURA_TELA - 190, ALTURA_TELA - 150, LARGURA_TELA, ALTURA_TELA - 80, al_map_rgb(0, 0, 0), 2);
+    al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA - 95, ALTURA_TELA - 130, ALLEGRO_ALIGN_CENTER, "Pausar");
     
     if (turno == 'R' && vezDoComputador == 0) {
-        al_draw_text(font, al_map_rgb(255, 0, 0), LARGURA_TELA - 150, 20, ALLEGRO_ALIGN_CENTER, "Turno do vermelho");
-        al_draw_textf(font, al_map_rgb(255, 0, 0), LARGURA_TELA - 150, 30, ALLEGRO_ALIGN_CENTER, "Total de dicas: %d", totDicasV);
+        al_draw_text(font, al_map_rgb(255, 0, 0), LARGURA_TELA, 40, ALLEGRO_ALIGN_RIGHT, "Turno do vermelho");
+        al_draw_textf(font, al_map_rgb(255, 0, 0), LARGURA_TELA, 80, ALLEGRO_ALIGN_RIGHT, "Total de dicas: %d", totDicasV);
     } else if (turno == 'B' && vezDoComputador == 0){
-        al_draw_text(font, al_map_rgb(0, 0, 255), LARGURA_TELA - 167, 20, ALLEGRO_ALIGN_CENTER, "Turno do azul");
-        al_draw_textf(font, al_map_rgb(0, 0, 255), LARGURA_TELA - 150, 30, ALLEGRO_ALIGN_CENTER, "Total de dicas: %d", totDicasA);
+        al_draw_text(font, al_map_rgb(0, 0, 255), LARGURA_TELA, 40, ALLEGRO_ALIGN_RIGHT, "Turno do azul");
+        al_draw_textf(font, al_map_rgb(0, 0, 255), LARGURA_TELA, 80, ALLEGRO_ALIGN_RIGHT, "Total de dicas: %d", totDicasA);
     } else {
-        al_draw_text(font, al_map_rgb(0, 0, 255), LARGURA_TELA - 150, 20, ALLEGRO_ALIGN_CENTER, "Computador jogando");
+        al_draw_text(font, al_map_rgb(0, 0, 255), LARGURA_TELA, 40, ALLEGRO_ALIGN_RIGHT, "Computador jogando");
     }
 
     al_draw_line(0, 610, 800, 610, al_map_rgb(0, 0, 0), 4);
@@ -603,7 +604,7 @@ void exibirJogo (Peca jogo[TAM][TAM], Posicao podeAndarPosicoes, Posicao podeCom
     al_draw_line(800, 610, 800, 0, al_map_rgb(0, 0, 0), 4);
     for (int i = 0, y = 0; i < 6; i++, y+=67) {
         al_draw_line(810, 143+y, 790, 143+y, al_map_rgb(0, 0, 0), 4);
-        al_draw_textf(font, al_map_rgb(0, 0, 0), 820, 140+y, ALLEGRO_ALIGN_CENTER, "%d", i);
+        al_draw_textf(font, al_map_rgb(0, 0, 0), 830, 135+y, ALLEGRO_ALIGN_CENTER, "%d", i);
     }
     al_flip_display();
 }
@@ -1146,6 +1147,7 @@ int main()
     // Variaveis da janela principal
     ALLEGRO_DISPLAY *janela = NULL;
     ALLEGRO_FONT *font = NULL;
+    ALLEGRO_FONT *fontTitulo = NULL;
     ALLEGRO_BITMAP *tabuleiro = NULL;
     ALLEGRO_EVENT_QUEUE *fila_eventos = NULL;
     ALLEGRO_TIMER *timer = NULL;
@@ -1175,13 +1177,18 @@ int main()
         return -1;
     }
 
+    al_init_ttf_addon();
+    if (!al_init_ttf_addon()) {
+        printf("Falha ao inicializar add-on allegro_ttf");
+        return -1;
+    }
+
     al_install_mouse();
     if (!al_install_mouse()) {
         printf("Falha ao inicializar o mouse");
         return -1;
     }
 
-    // Instala teclado
     al_install_keyboard();
     if (!al_install_keyboard()) {
         printf("Falha ao inicializar o teclado");
@@ -1202,9 +1209,15 @@ int main()
     al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
 
     // Carregando a fonte
-    //font = al_load_font("./OptimusPrinceps.ttf", 36, 0);
-    font = al_create_builtin_font();
+    font = al_load_font("./font.ttf", 30, 0);
+    //font = al_create_builtin_font();
     if (!font) {
+        printf("Falha ao carregar \"font.ttf\".\n");
+        return -1;
+    }
+
+    fontTitulo = al_load_font("./font.ttf", 50, 0);
+    if (!fontTitulo) {
         printf("Falha ao carregar \"font.ttf\".\n");
         return -1;
     }
@@ -1237,7 +1250,7 @@ int main()
 
     // Variaveis do jogo - constantes allegro
     float timeSleep = 0.07;
-    int xBotao = LARGURA_TELA / 2 - 100, yBotao = ALTURA_TELA / 4 + 50;
+    int xBotao = LARGURA_TELA / 2 - 140, yBotao = ALTURA_TELA / 4 + 50;
     ALLEGRO_COLOR corVermelhoPeca = al_map_rgb(255, 0, 0);
     ALLEGRO_COLOR corAzulPeca = al_map_rgb(0, 0, 255);
     ALLEGRO_COLOR corTrasparente = al_map_rgba(255, 200, 0, 100);
@@ -1269,14 +1282,6 @@ int main()
             ALLEGRO_EVENT evento;
             al_wait_for_event(fila_eventos, &evento);
 
-            if (evento.type == ALLEGRO_EVENT_KEY_DOWN) {
-                if (evento.keyboard.keycode == ALLEGRO_KEY_ESCAPE && situacao == 7) {
-                    situacao = situacaoAux;
-                }
-                if (evento.keyboard.keycode == ALLEGRO_KEY_TAB) {
-                    situacao = 6;
-                }
-            }
             if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
                 rodando = 0;
             }
@@ -1302,8 +1307,17 @@ int main()
                     }
             }
 
+            if (evento.type == ALLEGRO_EVENT_KEY_DOWN) {
+                if (evento.keyboard.keycode == ALLEGRO_KEY_ESCAPE && situacao == 7) {
+                    situacao = situacaoAux;
+                }
+                if (evento.keyboard.keycode == ALLEGRO_KEY_TAB) {
+                    situacao = 6;
+                }
+            }
+
             if (situacao == 1 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
-                if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 200 && evento.mouse.y >= yBotao && evento.mouse.y <= yBotao + 50) {
+                if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 280 && evento.mouse.y >= yBotao && evento.mouse.y <= yBotao + 70) {
                     limpaTela();
                     turno = 'R';
                     situacao = 2;
@@ -1326,8 +1340,7 @@ int main()
                     totDicasV = 2;
                     dica = 0;
                     al_rest(timeSleep);
-                }
-                else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 200 && evento.mouse.y >= yBotao + 80 && evento.mouse.y <= yBotao + 130) {
+                } else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 280 && evento.mouse.y >= yBotao + 90 && evento.mouse.y <= yBotao + 160) {
                     limpaTela();
                     turno = 'R';
                     situacao = 3;
@@ -1351,15 +1364,13 @@ int main()
                     matou = 0;
                     dica = 0;
                     al_rest(timeSleep);
-                }
-                else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 200 && evento.mouse.y >= yBotao + 160 && evento.mouse.y <= yBotao + 210) {
+                } else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 280 && evento.mouse.y >= yBotao + 180 && evento.mouse.y <= yBotao + 250) {
                     situacao = 4;
                     al_rest(timeSleep);
-                }
-                else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 200 && evento.mouse.y >= yBotao + 240 && evento.mouse.y <= yBotao + 290) {
+                } else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 280 && evento.mouse.y >= yBotao + 270 && evento.mouse.y <= yBotao + 340) {
                     situacao = 5;
                     al_rest(timeSleep);
-                } else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 200 && evento.mouse.y >= yBotao + 320 && evento.mouse.y <= yBotao + 370) {
+                } else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 280 && evento.mouse.y >= yBotao + 360 && evento.mouse.y <= yBotao + 430) {
                     rodando = 0;
                 }
             }
@@ -1542,8 +1553,8 @@ int main()
             }
             
             if (situacao == 6 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
-                if (evento.mouse.y >= yBotao && evento.mouse.y <= yBotao + 50) {
-                    if (evento.mouse.x >= xBotao - 150 && evento.mouse.x <= xBotao + 50) {
+                if (evento.mouse.y >= yBotao + 20 && evento.mouse.y <= yBotao + 100) {
+                    if (evento.mouse.x >= xBotao - 180 && evento.mouse.x <= xBotao + 70) {
                         limpaTela();
                         turno = 'R';
                         situacao = situacaoAux;
@@ -1568,7 +1579,7 @@ int main()
                             vezDoComputador = 0;
                             matou = 0;
                         }
-                    } else if (evento.mouse.x >= xBotao + 100 && evento.mouse.x <= xBotao + 300) {
+                    } else if (evento.mouse.x >= xBotao + 180 && evento.mouse.x <= xBotao + 430) {
                         situacao = 1;
                         situacaoAux = 1;
                     }
@@ -1580,31 +1591,31 @@ int main()
         {
         case 1:  
             al_clear_to_color(al_map_rgb(255, 255, 255));
-            al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5, ALLEGRO_ALIGN_CENTER, "Surakarta");
+            al_draw_text(fontTitulo, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5, ALLEGRO_ALIGN_CENTER, "Surakarta");
 
-            al_draw_rectangle(xBotao, yBotao, xBotao + 200, yBotao + 50, al_map_rgb(0, 0, 0), 2);
+            al_draw_rectangle(xBotao, yBotao, xBotao + 280, yBotao + 70, al_map_rgb(0, 0, 0), 2);
             al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 4 + 70, ALLEGRO_ALIGN_CENTER, "Jogar jxj");
 
-            al_draw_rectangle(xBotao, yBotao + 80, xBotao + 200, yBotao + 130, al_map_rgb(0, 0, 0), 2);
-            al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 4 + 150, ALLEGRO_ALIGN_CENTER, "Jogar jxpc");
+            al_draw_rectangle(xBotao, yBotao + 90, xBotao + 280, yBotao + 160, al_map_rgb(0, 0, 0), 2);
+            al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 4 + 160, ALLEGRO_ALIGN_CENTER, "Jogar jxpc");
 
-            al_draw_rectangle(xBotao, yBotao + 160, xBotao + 200, yBotao + 210, al_map_rgb(0, 0, 0), 2);
-            al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 4 + 230, ALLEGRO_ALIGN_CENTER, "Ajuda");
+            al_draw_rectangle(xBotao, yBotao + 180, xBotao + 280, yBotao + 250, al_map_rgb(0, 0, 0), 2);
+            al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 4 + 250, ALLEGRO_ALIGN_CENTER, "Ajuda");
 
-            al_draw_rectangle(xBotao, yBotao + 240, xBotao + 200, yBotao + 290, al_map_rgb(0, 0, 0), 2);
-            al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 4 + 310, ALLEGRO_ALIGN_CENTER, "Historico");
+            al_draw_rectangle(xBotao, yBotao + 270, xBotao + 280, yBotao + 340, al_map_rgb(0, 0, 0), 2);
+            al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 4 + 340, ALLEGRO_ALIGN_CENTER, "Historico");
 
-            al_draw_rectangle(xBotao, yBotao + 320, xBotao + 200, yBotao + 370, al_map_rgb(0, 0, 0), 2);
-            al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 4 + 390, ALLEGRO_ALIGN_CENTER, "Sair");
+            al_draw_rectangle(xBotao, yBotao + 360, xBotao + 280, yBotao + 430, al_map_rgb(0, 0, 0), 2);
+            al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 4 + 430, ALLEGRO_ALIGN_CENTER, "Sair");
 
             al_flip_display();
             break;
         case 2:    
-            exibirJogo (jogo, podeAndarPosicoes, podeComerArcoPPosicoes, podeComerArcoGPosicoes, movDica, tabuleiro, font, horas, minutos, segundos, turno, corTrasparente, vezDoComputador, situacaoDJogo, &podeJogar, totDicasV, totDicasA, dica);
+            exibirJogo(jogo, podeAndarPosicoes, podeComerArcoPPosicoes, podeComerArcoGPosicoes, movDica, tabuleiro, font, horas, minutos, segundos, turno, corTrasparente, vezDoComputador, situacaoDJogo, &podeJogar, totDicasV, totDicasA, dica);
             jogadaPossivel(&podeAndarPosicoes, &podeComerArcoPPosicoes, &podeComerArcoGPosicoes, vetL, jogo, pecaEscolhida, podeJogar, &situacaoDJogo);           
             break;
         case 3:  
-            exibirJogo (jogo, podeAndarPosicoes, podeComerArcoPPosicoes, podeComerArcoGPosicoes, movDica, tabuleiro, font, horas, minutos, segundos, turno, corTrasparente, vezDoComputador, situacaoDJogo, &podeJogar, totDicasV, totDicasA, dica);
+            exibirJogo(jogo, podeAndarPosicoes, podeComerArcoPPosicoes, podeComerArcoGPosicoes, movDica, tabuleiro, font, horas, minutos, segundos, turno, corTrasparente, vezDoComputador, situacaoDJogo, &podeJogar, totDicasV, totDicasA, dica);
             if (!vezDoComputador) {
                 jogadaPossivel(&podeAndarPosicoes, &podeComerArcoPPosicoes, &podeComerArcoGPosicoes, vetL, jogo, pecaEscolhida, podeJogar, &situacaoDJogo);
             } else {
@@ -1637,17 +1648,17 @@ int main()
         case 6:
             al_clear_to_color(al_map_rgb(255, 255, 255));
             if (turno == 'R') {
-                al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5, ALLEGRO_ALIGN_CENTER, "Vermelho venceu!");
+                al_draw_text(font, al_map_rgb(255, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5, ALLEGRO_ALIGN_CENTER, "Vermelho venceu!");
             } else {
-                al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5, ALLEGRO_ALIGN_CENTER, "Azul venceu!");
+                al_draw_text(font, al_map_rgb(0, 0, 255), LARGURA_TELA / 2, ALTURA_TELA / 5, ALLEGRO_ALIGN_CENTER, "Azul venceu!");
             }
-            al_draw_textf(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5 + 20, ALLEGRO_ALIGN_CENTER, "Tempo: %02d:%02d:%02d", horas, minutos, segundos);
+            al_draw_textf(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5 + 50, ALLEGRO_ALIGN_CENTER, "Tempo: %02d:%02d:%02d", horas, minutos, segundos);
             
-            al_draw_rectangle(xBotao - 150, yBotao, xBotao + 50, yBotao + 50, al_map_rgb(0, 0, 0), 2);
-            al_draw_text(font, al_map_rgb(0, 0, 0), xBotao - 50, ALTURA_TELA / 4 + 70, ALLEGRO_ALIGN_CENTER, "Recomecar");
+            al_draw_rectangle(xBotao - 180, yBotao + 20, xBotao + 70, yBotao + 100, al_map_rgb(0, 0, 0), 2);
+            al_draw_text(font, al_map_rgb(0, 0, 0), xBotao - 50, yBotao + 45, ALLEGRO_ALIGN_CENTER, "Recomecar");
 
-            al_draw_rectangle(xBotao + 130, yBotao, xBotao + 330, yBotao + 50, al_map_rgb(0, 0, 0), 2);
-            al_draw_text(font, al_map_rgb(0, 0, 0), xBotao + 230, ALTURA_TELA / 4 + 70, ALLEGRO_ALIGN_CENTER, "Voltar ao menu");
+            al_draw_rectangle(xBotao + 180, yBotao + 20, xBotao + 430, yBotao + 100, al_map_rgb(0, 0, 0), 2);
+            al_draw_text(font, al_map_rgb(0, 0, 0), xBotao + 310, yBotao + 45, ALLEGRO_ALIGN_CENTER, "Menu");
             
             al_flip_display();
             break;
