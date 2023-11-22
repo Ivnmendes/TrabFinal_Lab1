@@ -45,10 +45,11 @@
 # Folders
 .vscode/
 
-# Exe
+# Executaveis
 *.exe
 logica
 allegro
+testeManipulacao
 
 # .c
 testeManipulacao.c
