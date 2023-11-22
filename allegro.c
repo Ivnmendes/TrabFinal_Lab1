@@ -1142,6 +1142,117 @@ void jogadaPossivel (Posicao *podeAndarP, Posicao *podeComerArcP, Posicao *podeC
     }
 }
 
+void lerHistoricoTempo (int horasPvP[5], int minutosPvP[5], int segundosPvP[5], int horasPvC[5], int minutosPvC[5], int segundosPvC[5]) {
+    FILE *arq;
+    arq = fopen("./historico.txt", "r");
+    if (arq == NULL) {
+        printf("Erro ao abrir o arquivo.\n");
+        return;
+    }
+
+    if ((int) fgetc(arq)) {
+        fseek(arq, 6, SEEK_SET);
+        for (int i = 0; i < 5; i++) {
+            fscanf(arq, "%d:%d:%d\n", &horasPvP[i], &minutosPvP[i], &segundosPvP[i]);
+        }
+        fseek(arq, 4, SEEK_CUR);
+        for (int i = 0; i < 5; i++) {
+            fscanf(arq, "%d:%d:%d\n", &horasPvC[i], &minutosPvC[i], &segundosPvC[i]);
+        }
+    }
+    fclose(arq);
+}
+
+void escreveHistoricoTempo (int horasPvP[5], int minutosPvP[5], int segundosPvP[5], int horasPvC[5], int minutosPvC[5], int segundosPvC[5]) {
+    FILE *arq;
+    arq = fopen("./historico.txt", "w");
+    if (arq == NULL) {
+        printf("Erro ao abrir o arquivo.\n");
+        return;
+    }
+
+    fprintf(arq, "1\n");
+    fprintf(arq, "\nPvP\n");
+
+    for (int i = 0; i < 5; i++) {
+        fprintf(arq, "%d:%d:%d\n", horasPvP[i], minutosPvP[i], segundosPvP[i]);
+    }
+
+    fprintf(arq, "\nPvC\n");
+
+    for (int i = 0; i < 5; i++) {
+        fprintf(arq, "%d:%d:%d\n", horasPvC[i], minutosPvC[i], segundosPvC[i]);
+    }
+    fclose(arq);
+}
+
+void verificaHistoricoVazio () {
+    FILE *arq;
+    arq = fopen("./historico.txt", "w+");
+    if (arq == NULL) {
+        printf("Erro ao abrir o arquivo.\n");
+        return;
+    }
+
+    if (fgetc(arq) != '1') {
+        printf("aqui");
+        fprintf(arq, "1\n");
+        fprintf(arq, "\nPvP\n");
+
+        for (int i = 0; i < 5; i++) {
+            fprintf(arq, "%d:%d:%d\n", -1, -1, -1);
+        }
+
+        fprintf(arq, "\nPvC\n");
+
+        for (int i = 0; i < 5; i++) {
+            fprintf(arq, "%d:%d:%d\n", -1, -1, -1);
+        }
+    }
+    fclose(arq);
+}
+
+void atualizaVetoresTempo (int horas, int minutos, int segundos, int horasVet[5], int minutosVet[5], int segundosVet[5]) {
+        for (int i = 0; i < 5; i++) {
+            if (horasVet[i] == -1) {
+                segundosVet[i] = segundos;
+                minutosVet[i] = minutos;
+                horasVet[i] = horas;
+                break;
+            } else if (horasVet[i] > horas) {
+                for (int j = 5; j >= i; j--) {
+                    horasVet[j] = horasVet[j - 1];
+                    minutosVet[j] = minutosVet[j - 1];
+                    segundosVet[j] = segundosVet[j - 1];
+                }
+                segundosVet[i] = segundos;
+                minutosVet[i] = minutos;
+                horasVet[i] = horas;
+                break;
+            } else if (horasVet[i] == horas && minutosVet[i] > minutos) {
+                for (int j = 5; j >= i; j--) {
+                    horasVet[j] = horasVet[j - 1];
+                    minutosVet[j] = minutosVet[j - 1];
+                    segundosVet[j] = segundosVet[j - 1];
+                }
+                segundosVet[i] = segundos;
+                minutosVet[i] = minutos;
+                horasVet[i] = horas;
+                break;
+            } else if (horasVet[i] == horas && minutosVet[i] == minutos && segundosVet[i] > segundos) {
+                for (int j = 5; j >= i; j--) {
+                    horasVet[j] = horasVet[j - 1];
+                    minutosVet[j] = minutosVet[j - 1];
+                    segundosVet[j] = segundosVet[j - 1];
+                }
+                segundosVet[i] = segundos;
+                minutosVet[i] = minutos;
+                horasVet[i] = horas;
+                break;
+            }
+        }
+}
+
 int main()
 {
     // Variaveis da janela principal
@@ -1292,9 +1403,9 @@ int main()
     char vetColunas[] = {'A', 'B', 'C', 'D', 'E', 'F'};
     char auxTurno[9];
     int totPecasV, totPecasA, totDicasV, totDicasA;
-    int vetL[4];
+    int vetL[4], horasPvp[5], minutosPvp[5], segundosPvp[5], horasPvc[5], minutosPvc[5], segundosPvc[5];
     int op;
-    int vezDoComputador = 0, matou, dica;
+    int vezDoComputador = 0, matou, dica, escreveu;
     int pagAjuda;
     
     Peca jogo[TAM][TAM];
@@ -1305,6 +1416,17 @@ int main()
     Posicao podeAndarPosicoes;
     Posicao podeComerArcoGPosicoes;
     Posicao podeComerArcoPPosicoes;
+
+    //verificaHistoricoVazio();
+    for (int i = 0; i < 5; i++) {
+        horasPvp[i] = -1;
+        minutosPvp[i] = -1;
+        segundosPvp[i] = -1;
+        horasPvc[i] = -1;
+        minutosPvc[i] = -1;
+        segundosPvc[i] = -1;
+    }
+    int cont = 0;    
 
     while (rodando) {
         while (!al_is_event_queue_empty(fila_eventos)) {
@@ -1351,6 +1473,7 @@ int main()
 
             if (situacao == 1 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
                 if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 280 && evento.mouse.y >= yBotao && evento.mouse.y <= yBotao + 70) {
+                    escreveu = 0;
                     limpaTela();
                     turno = 'R';
                     situacao = 2;
@@ -1374,6 +1497,7 @@ int main()
                     dica = 0;
                     al_rest(timeSleep);
                 } else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 280 && evento.mouse.y >= yBotao + 90 && evento.mouse.y <= yBotao + 160) {
+                    escreveu = 0;
                     limpaTela();
                     turno = 'R';
                     situacao = 3;
@@ -1609,6 +1733,7 @@ int main()
             if (situacao == 6 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
                 if (evento.mouse.y >= yBotao + 20 && evento.mouse.y <= yBotao + 100) {
                     if (evento.mouse.x >= xBotao - 180 && evento.mouse.x <= xBotao + 70) {
+                        escreveu = 0;
                         limpaTela();
                         turno = 'R';
                         situacao = situacaoAux;
@@ -1656,7 +1781,8 @@ int main()
         }
         switch (situacao)
         {
-        case 1:  
+        case 1:
+            lerHistoricoTempo(horasPvp, minutosPvp, segundosPvp, horasPvc, minutosPvc, segundosPvc);
             al_clear_to_color(al_map_rgb(255, 255, 255));
             al_draw_text(fontTitulo, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5, ALLEGRO_ALIGN_CENTER, "Surakarta");
 
@@ -1674,7 +1800,7 @@ int main()
 
             al_draw_rectangle(xBotao, yBotao + 360, xBotao + 280, yBotao + 430, al_map_rgb(0, 0, 0), 2);
             al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 4 + 430, ALLEGRO_ALIGN_CENTER, "Sair");
-
+            int a = 1;
             al_flip_display();
             break;
         case 2:    
@@ -1840,9 +1966,14 @@ int main()
             al_draw_line(70, ALTURA_TELA / 5 + 35, LARGURA_TELA / 2 - 85, ALTURA_TELA / 5 + 35, al_map_rgb(0, 0, 0), 4);
             al_draw_line(LARGURA_TELA - 585, ALTURA_TELA / 5 + 35, LARGURA_TELA - 35, ALTURA_TELA / 5 + 35, al_map_rgb(0, 0, 0), 4);
             al_draw_line(LARGURA_TELA / 2, ALTURA_TELA / 25 + 80, LARGURA_TELA / 2, ALTURA_TELA - 100, al_map_rgb(0, 0, 0), 4);
+            
             for (int i = 0; i < 5; i++) {
-                al_draw_textf(font, al_map_rgb(100, 100, 100), 30, ALTURA_TELA / 5 + 70 + 80 * i, ALLEGRO_ALIGN_LEFT, "%d.", i + 1);
-                al_draw_textf(font, al_map_rgb(100, 100, 100), LARGURA_TELA / 2 + 30, ALTURA_TELA / 5 + 70 + 80 * i, ALLEGRO_ALIGN_LEFT, "%d.", i + 1);
+                if (horasPvp[i] != -1) {
+                    al_draw_textf(font, al_map_rgb(100, 100, 100), 70, ALTURA_TELA / 5 + 70 + 80 * i, ALLEGRO_ALIGN_LEFT, "%d. %02d:%02d:%02d", i + 1, horasPvp[i], minutosPvp[i], segundosPvp[i]);
+                }
+                if (horasPvc[i] != -1) {
+                    al_draw_textf(font, al_map_rgb(100, 100, 100), LARGURA_TELA - 585, ALTURA_TELA / 5 + 70 + 80 * i, ALLEGRO_ALIGN_LEFT, "%d. %02d:%02d:%02d", i + 1, horasPvc[i], minutosPvc[i], segundosPvc[i]);
+                }
             }
 
             al_draw_circle(50, 50, 40, al_map_rgb(0, 0, 0), 3);
@@ -1851,6 +1982,16 @@ int main()
             al_flip_display();
             break;
         case 6:
+            if (!escreveu) {
+                if (situacaoAux == 2) {
+                    atualizaVetoresTempo(horas, minutos, segundos, horasPvp, minutosPvp, segundosPvp);
+                } else if (situacaoAux == 3) {
+                    atualizaVetoresTempo(horas, minutos, segundos, horasPvc, minutosPvc, segundosPvc);
+                }
+                escreveu = 1;
+            }
+            escreveHistoricoTempo(horasPvp, minutosPvp, segundosPvp, horasPvc, minutosPvc, segundosPvc);
+
             al_clear_to_color(al_map_rgb(255, 255, 255));
             if (turno == 'R') {
                 al_draw_text(font, al_map_rgb(255, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5, ALLEGRO_ALIGN_CENTER, "Vermelho venceu!");

@@ -50,6 +50,9 @@
 logica
 allegro
 
+# .c
+testeManipulacao.c
+
 # Kernel Module Compile Results
 *.mod*
 *.cmd
