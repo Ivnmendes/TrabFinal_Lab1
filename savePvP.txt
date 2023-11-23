@@ -1,26 +1,26 @@
 variaveis {
 turno:R
-rodad:8
-segun:24
+rodad:0
+segun:2
 minut:0
 horas:0
-ttPcA:11
+ttPcA:12
 ttPcV:12
-ttDcV:1
+ttDcV:2
 ttDcA:2
 }
 jogo {
 00:B
 01:B
 02:B
-03:R
+03:B
 04:B
 05:B
 10:B
 11:B
 12:B
 13:B
-14:-
+14:B
 15:B
 20:-
 21:-
@@ -39,7 +39,7 @@ jogo {
 42:R
 43:R
 44:R
-45:B
+45:R
 50:R
 51:R
 52:R
