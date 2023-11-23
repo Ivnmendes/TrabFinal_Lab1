@@ -1422,6 +1422,7 @@ int main()
     ALLEGRO_BITMAP *capturaExemplo2 = NULL;
     ALLEGRO_EVENT_QUEUE *fila_eventos = NULL;
     ALLEGRO_TIMER *timer = NULL;
+    ALLEGRO_TIMER *timerClick = NULL;
 
     // Inicializando a biblioteca Allegro
     al_init();
@@ -1467,7 +1468,18 @@ int main()
     }
 
     timer = al_create_timer(1.0);
+    if (!timer) {
+        printf("Falha ao criar temporizador");
+        return -1;
+    }
     al_start_timer(timer);
+
+    timerClick = al_create_timer(0.1);
+    if (!timerClick) {
+        printf("Falha ao criar temporizador");
+        return -1;
+    }
+    al_start_timer(timerClick);
 
     // Criando a janela principal
     janela = al_create_display(LARGURA_TELA, ALTURA_TELA);
@@ -1536,9 +1548,10 @@ int main()
     al_register_event_source(fila_eventos, al_get_mouse_event_source());
     al_register_event_source(fila_eventos, al_get_keyboard_event_source());
     al_register_event_source(fila_eventos, al_get_timer_event_source(timer));   
+    al_register_event_source(fila_eventos, al_get_timer_event_source(timerClick));
     
     // Variaveis do jogo - Contadoras
-    int segundos, minutos, horas;
+    int segundos, minutos, horas, milisegundos;
     int tempoDeEspera = 0;
     int rodada;
 
@@ -1561,7 +1574,7 @@ int main()
     int totPecasV, totPecasA, totDicasV, totDicasA;
     int vetL[4], horasPvp[5], minutosPvp[5], segundosPvp[5], horasPvc[5], minutosPvc[5], segundosPvc[5];
     int op;
-    int vezDoComputador = 0, matou, dica, escreveu, salvou;
+    int vezDoComputador = 0, matou, dica, escreveu, salvou, clicou = 0;
     int pagAjuda;
     
     Peca jogo[TAM][TAM];
@@ -1584,6 +1597,7 @@ int main()
     }
     int cont = 0;    
 
+    int xy = 3;
     while (rodando) {
         while (!al_is_event_queue_empty(fila_eventos)) {
             ALLEGRO_EVENT evento;
@@ -1593,41 +1607,47 @@ int main()
                 rodando = 0;
             }
 
-            if (evento.type == ALLEGRO_EVENT_TIMER && (situacao == 2 || situacao == 3)) {
-                    segundos++;
-                    if (segundos == 60) {
-                        minutos++;
-                        segundos = 0;
-                    }
-                    if (minutos == 60) {
-                        horas++;
-                        minutos = 0;
-                    }
-                    if (horas == 24) {
-                        segundos = 0;
-                        minutos = 0;
-                        horas = 0;
+            if (evento.type == ALLEGRO_EVENT_TIMER) {
+                    if (evento.timer.source == timer && (situacao == 2 || situacao == 3)) {
+                        segundos++;
+                        if (segundos == 60) {
+                            minutos++;
+                            segundos = 0;
+                        }
+                        if (minutos == 60) {
+                            horas++;
+                            minutos = 0;
+                        }
+                        if (horas == 24) {
+                            segundos = 0;
+                            minutos = 0;
+                            horas = 0;
+                        }
+
+                        if (vezDoComputador == 1 && tempoDeEspera <= 1) {
+                            tempoDeEspera++;
+                        }
+                    } else if (evento.timer.source == timerClick && clicou) {
+                            milisegundos--;
+                            if (milisegundos == 0) {
+                                clicou = 0;
+                            }
                     }
 
-                    if (vezDoComputador == 1 && tempoDeEspera <= 1) {
-                        tempoDeEspera++;
-                    }
             }
 
             if (evento.type == ALLEGRO_EVENT_KEY_DOWN) {
                 if (evento.keyboard.keycode == ALLEGRO_KEY_ESCAPE && situacao == 7) {
                     situacao = situacaoAux;
-                    al_rest(timeSleep);
                 } else if (evento.keyboard.keycode == ALLEGRO_KEY_ESCAPE && (situacao == 2 || (situacao == 3 && vezDoComputador == 0))) {
                     situacao = 7;
-                    al_rest(timeSleep);
                 }
                 if (evento.keyboard.keycode == ALLEGRO_KEY_TAB) {
                     situacao = 8;
                 }
             }
 
-            if (situacao == 1 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+            if (situacao == 1 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && !clicou) {
                 if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 280 && evento.mouse.y >= yBotao && evento.mouse.y <= yBotao + 70) {
                     situacao = 2;
                     if (contemSave(situacao)) {
@@ -1659,7 +1679,8 @@ int main()
                         dica = 0;
                         escreveu = 0;
                     }
-                    al_rest(timeSleep);
+                    clicou = 1;
+                    milisegundos = xy;
                 } else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 280 && evento.mouse.y >= yBotao + 90 && evento.mouse.y <= yBotao + 160) {
                     situacao = 3;
                     if (contemSave(situacao)) {
@@ -1691,19 +1712,22 @@ int main()
                         matou = 0;
                         escreveu = 0;
                     }
-                    al_rest(timeSleep);
+                    clicou = 1;
+                    milisegundos = xy;
                 } else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 280 && evento.mouse.y >= yBotao + 180 && evento.mouse.y <= yBotao + 250) {
                     situacao = 4;
                     pagAjuda = 1;
-                    al_rest(timeSleep);
+                    clicou = 1;
+                    milisegundos = xy;
                 } else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 280 && evento.mouse.y >= yBotao + 270 && evento.mouse.y <= yBotao + 340) {
                     situacao = 5;
-                    al_rest(timeSleep);
+                    clicou = 1;
+                    milisegundos = xy;
                 } else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 280 && evento.mouse.y >= yBotao + 360 && evento.mouse.y <= yBotao + 430) {
                     rodando = 0;
                 }
             }
-            if ((situacao == 2 || situacao == 3) && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && vezDoComputador == 0) {
+            if ((situacao == 2 || situacao == 3) && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && !clicou  && vezDoComputador == 0) {
                 if (evento.mouse.x >= 0 && evento.mouse.x <= 800 && evento.mouse.y >= 0 && evento.mouse.y <= 600) {
                     int i = (evento.mouse.y - 140) / 67;
                     int j = (evento.mouse.x - 175) / 87;
@@ -1717,14 +1741,16 @@ int main()
                                 situacaoDJogo = 1;
                                 podeJogar = 1;
                                 break;
+                                clicou = 1;
+                                milisegundos = xy;
                             }
                         }
                     }
-                    al_rest(timeSleep);
                 }
                 
             }
-            if ((situacao == 2 || situacao == 3) && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && vezDoComputador == 0) {
+
+            if ((situacao == 2 || situacao == 3) && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && !clicou && vezDoComputador == 0) {
                 if (podeJogar == 1 && evento.mouse.x >= 0 && evento.mouse.x <= 800 && evento.mouse.y >= 0 && evento.mouse.y <= 600) {
                     for (int k = 0; k < 8; k++) {
                         if (podeAndarPosicoes.i[k] != -1) {
@@ -1758,6 +1784,8 @@ int main()
                                 situacaoDJogo = 0;
                                 podeJogar = 0;
                                 pecaEscolhida.i = -1;
+                                clicou = 1;
+                                milisegundos = xy;
                                 break;
                             }
                         }
@@ -1799,6 +1827,8 @@ int main()
                                 podeJogar = 0;
                                 pecaEscolhida.i = -1;
                                 inicializarStruct(&podeComerArcoPPosicoes, jogo);
+                                clicou = 1;
+                                milisegundos = xy;
                                 break;
                             }
                         }
@@ -1840,22 +1870,24 @@ int main()
                                 podeJogar = 0;
                                 pecaEscolhida.i = -1;
                                 inicializarStruct(&podeComerArcoGPosicoes, jogo);
+                                clicou = 1;
+                                milisegundos = xy;
                                 break;
                             }
                         }
                     }
                 }   
-                al_rest(timeSleep);
             }
 
-            if ((situacao == 2 || situacao == 3) && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && vezDoComputador == 0) {
+            if ((situacao == 2 || situacao == 3) && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && !clicou  && vezDoComputador == 0) {
                 if (evento.mouse.x >= LARGURA_TELA - 150 && evento.mouse.x <= LARGURA_TELA && evento.mouse.y >= ALTURA_TELA - 150 && evento.mouse.y <= ALTURA_TELA - 80) {
+                    clicou = 1;
+                    milisegundos = xy;
                     situacao = 7;
-                    al_rest(timeSleep);
                 }
             }
 
-            if ((situacao == 2 || situacao == 3) && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && vezDoComputador == 0) {
+            if ((situacao == 2 || situacao == 3) && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN&& !clicou  && vezDoComputador == 0) {
                 if (evento.mouse.x >= LARGURA_TELA - 150 && evento.mouse.x <= LARGURA_TELA && evento.mouse.y >= ALTURA_TELA - 240 && evento.mouse.y <= ALTURA_TELA - 170) {
                     if (turno == 'R') {
                         if (totDicasV > 0) {
@@ -1878,10 +1910,12 @@ int main()
                             }
                         }
                     }
+                    clicou = 1;
+                    milisegundos = xy;
                 }
             }
             
-            if (situacao == 4 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+            if (situacao == 4 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && !clicou ) {
                 if (evento.mouse.y >= ALTURA_TELA - 50 - 40 && evento.mouse.y <= ALTURA_TELA - 50 + 40) {
                     if (evento.mouse.x >= 50 - 40 && evento.mouse.x <= 50 + 40) {
                         pagAjuda--;
@@ -1892,16 +1926,19 @@ int main()
                     if (pagAjuda < 1 || pagAjuda > 6) {
                         situacao = 1;
                     }
+                    clicou = 1;
+                    milisegundos = xy;
                 }
             }
 
-            if (situacao == 5 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+            if (situacao == 5 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && !clicou ) {
                 if (evento.mouse.x >= 50 - 40 && evento.mouse.x <= 50 + 40 && evento.mouse.y >= 50 - 40 && evento.mouse.y <= 50 + 40) {
                     situacao = 1;
+                    clicou = 1;
+                    milisegundos = xy;
                 }
             }
-            
-            if (situacao == 6 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+            if (situacao == 6 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && !clicou ) {
                 if (evento.mouse.y >= yBotao + 20 && evento.mouse.y <= yBotao + 100) {
                     if (evento.mouse.x >= xBotao - 180 && evento.mouse.x <= xBotao + 70) {
                         salvou = -1;
@@ -1934,28 +1971,31 @@ int main()
                         situacao = 1;
                         situacaoAux = 1;
                     }
-                    al_rest(timeSleep);
+                    clicou = 1;
+                    milisegundos = xy;
                 }
             }
 
-            if (situacao == 7 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+            if (situacao == 7 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && !clicou ) {
                 if (evento.mouse.x >= xBotao && evento.mouse.x < xBotao + 280) {
                     if (evento.mouse.y >= yBotao && evento.mouse.y <= yBotao + 70) {
                         situacao = situacaoAux;
+                        salvou = -1;
                     } else if (evento.mouse.y >= yBotao + 90 && evento.mouse.y <= yBotao + 160) {
                         salvou = escreveSave(turno, rodada, segundos, minutos, horas, totPecasA, totPecasV, totDicasV, totDicasA, situacaoAux, jogo);
                     } else if (evento.mouse.y >= yBotao + 180 && evento.mouse.y <= yBotao + 250) {
                         situacao = 1;
                         situacaoAux = 1;
                     }
+                    clicou = 1;
+                    milisegundos = xy;
                 }
             }
 
-            if (situacao == 8 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+            if (situacao == 8 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && !clicou ) {
                 if (evento.mouse.x >= LARGURA_TELA / 2 - 500 && evento.mouse.x <= LARGURA_TELA / 2 + 500 && evento.mouse.y >= ALTURA_TELA / 2 - 150 && evento.mouse.y <= ALTURA_TELA / 2 + 50) {
                     if (evento.mouse.y >= ALTURA_TELA / 2 - 60 && evento.mouse.y <= ALTURA_TELA / 2 + 10) {
                         if (evento.mouse.x >= LARGURA_TELA / 2 - 175 && evento.mouse.x <= LARGURA_TELA / 2 - 10) {
-                            printf("Carregando o jogo...\n");
                             leSave(&turno, &rodada, &segundos, &minutos, &horas, &totPecasA, &totPecasV, &totDicasV, &totDicasA, situacaoAux, jogo);
                             limpaTela();
                             inicializarStruct(&movDica, jogo);
@@ -1974,7 +2014,6 @@ int main()
                                 matou = 0;
                             }
                         } else if (evento.mouse.x >= LARGURA_TELA / 2 + 10 && evento.mouse.x <= LARGURA_TELA / 2 + 175) {
-                            printf("Recomecou...\n");
                             turno = 'R';
                             totPecasA = 12;
                             totPecasV = 12;
@@ -2000,12 +2039,15 @@ int main()
                             matou = 0;
                             escreveu = 0;
                         }
+                        clicou = 1;
+                        milisegundos = xy;
                     }
                 } else {
+                    clicou = 1;
+                    milisegundos = xy;
                     situacao = 1;
                     situacaoAux = 1;
                 }
-                al_rest(timeSleep);
             }
         }
         switch (situacao)
@@ -2261,7 +2303,6 @@ int main()
             al_flip_display();
             break;
         case 8:
-            printf("situacao: %d\n", situacao);
             al_draw_rectangle(LARGURA_TELA / 2 - 500, ALTURA_TELA / 2 - 150, LARGURA_TELA / 2 + 500, ALTURA_TELA / 2 + 50, al_map_rgb(0, 0, 0), 5);
             al_draw_filled_rectangle(LARGURA_TELA / 2 - 495, ALTURA_TELA / 2 - 145, LARGURA_TELA / 2 + 495, ALTURA_TELA / 2 + 45, al_map_rgb(255, 255, 255));
 
