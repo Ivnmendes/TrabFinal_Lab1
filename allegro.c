@@ -1255,7 +1255,7 @@ void atualizaVetoresTempo (int horas, int minutos, int segundos, int horasVet[5]
         }
 }
 
-void escreveSave (char turno, int rodada, int segundos, int minutos, int horas, int totPecasA, int totPecasV, int totDicasV, int totDicasA, int situacao, Peca jogo[TAM][TAM]) {
+int escreveSave (char turno, int rodada, int segundos, int minutos, int horas, int totPecasA, int totPecasV, int totDicasV, int totDicasA, int situacao, Peca jogo[TAM][TAM]) {
     FILE *arq;
 
     if (situacao == 2) {
@@ -1266,7 +1266,7 @@ void escreveSave (char turno, int rodada, int segundos, int minutos, int horas, 
 
     if (arq == NULL) {
         printf("Erro ao abrir o arquivo.\n");
-        return;
+        return 0;
     }
 
     fprintf(arq, "%s {\n", "variaveis");
@@ -1291,12 +1291,11 @@ void escreveSave (char turno, int rodada, int segundos, int minutos, int horas, 
     }
     fprintf(arq, "}\n");
     fclose(arq);
+    return 1;
 }
 
-void leSave (char *turno, int *rodada, int *segundos, int *minutos, int *horas, int *totPecasA, int *totPecasV, int *totDicasV, int *totDicasA, int situacao, Peca jogo[TAM][TAM]) {
+int leSave (char *turno, int *rodada, int *segundos, int *minutos, int *horas, int *totPecasA, int *totPecasV, int *totDicasV, int *totDicasA, int situacao, Peca jogo[TAM][TAM]) {
     FILE *arq;
-
-    char linha[100];
 
     char turnoAux;
     int rodadaAux;
@@ -1318,7 +1317,7 @@ void leSave (char *turno, int *rodada, int *segundos, int *minutos, int *horas, 
 
     if (arq == NULL) {
         printf("Erro ao abrir o arquivo.\n");
-        return;
+        return 0;
     }
     
     fseek(arq, 18, SEEK_SET);
@@ -1361,8 +1360,8 @@ void leSave (char *turno, int *rodada, int *segundos, int *minutos, int *horas, 
     }
 
     fseek(arq, 12, SEEK_CUR);
-    for (int i = 0, y; i < TAM; i++, y+=67) {
-        for (int j = 0, x; j < TAM; j++, x+=87) {
+    for (int i = 0, y = 0; i < TAM; i++, y+=67) {
+        for (int j = 0, x = 0; j < TAM; j++, x+=87) {
             fscanf(arq, "%c\n", &jogo[i][j].time);
             jogo[i][j].i = i;
             jogo[i][j].j = j;
@@ -1374,6 +1373,7 @@ void leSave (char *turno, int *rodada, int *segundos, int *minutos, int *horas, 
     }
 
     fclose(arq);
+    return 1;
 }
 
 int contemSave (int situacao) {
@@ -1392,6 +1392,23 @@ int contemSave (int situacao) {
     return contem;
 }
 
+void limpaSave (int situacao) {
+    FILE *arq;
+
+    if (situacao == 2) {
+        arq = fopen("./savePvP.txt", "w");
+    } else {
+        arq = fopen("./savePvC.txt", "w");
+    }
+
+    if (arq == NULL) {
+        printf("Erro ao abrir o arquivo.\n");
+        return;
+    }
+
+
+    fclose(arq);
+}
 int main()
 {
     // Variaveis da janela principal
@@ -1526,7 +1543,7 @@ int main()
     int rodada;
 
     // Variaveis do jogo - constantes allegro
-    float timeSleep = 0.07;
+    float timeSleep = 0.1;
     int xBotao = LARGURA_TELA / 2 - 140, yBotao = ALTURA_TELA / 4 + 50;
     ALLEGRO_COLOR corVermelhoPeca = al_map_rgb(255, 0, 0);
     ALLEGRO_COLOR corAzulPeca = al_map_rgb(0, 0, 255);
@@ -1544,7 +1561,7 @@ int main()
     int totPecasV, totPecasA, totDicasV, totDicasA;
     int vetL[4], horasPvp[5], minutosPvp[5], segundosPvp[5], horasPvc[5], minutosPvc[5], segundosPvc[5];
     int op;
-    int vezDoComputador = 0, matou, dica, escreveu;
+    int vezDoComputador = 0, matou, dica, escreveu, salvou;
     int pagAjuda;
     
     Peca jogo[TAM][TAM];
@@ -1617,6 +1634,7 @@ int main()
                         situacao = 8;
                         situacaoAux = 2;
                     } else {
+                        salvou = -1;
                         turno = 'R';
                         totPecasA = 12;
                         totPecasV = 12;
@@ -1648,6 +1666,7 @@ int main()
                         situacao = 8;
                         situacaoAux = 3;
                     } else {
+                        salvou = -1;
                         turno = 'R';
                         totPecasA = 12;
                         totPecasV = 12;
@@ -1885,6 +1904,7 @@ int main()
             if (situacao == 6 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
                 if (evento.mouse.y >= yBotao + 20 && evento.mouse.y <= yBotao + 100) {
                     if (evento.mouse.x >= xBotao - 180 && evento.mouse.x <= xBotao + 70) {
+                        salvou = -1;
                         limpaTela();
                         turno = 'R';
                         rodada = 0;
@@ -1923,12 +1943,69 @@ int main()
                     if (evento.mouse.y >= yBotao && evento.mouse.y <= yBotao + 70) {
                         situacao = situacaoAux;
                     } else if (evento.mouse.y >= yBotao + 90 && evento.mouse.y <= yBotao + 160) {
-
+                        salvou = escreveSave(turno, rodada, segundos, minutos, horas, totPecasA, totPecasV, totDicasV, totDicasA, situacaoAux, jogo);
                     } else if (evento.mouse.y >= yBotao + 180 && evento.mouse.y <= yBotao + 250) {
                         situacao = 1;
                         situacaoAux = 1;
                     }
                 }
+            }
+
+            if (situacao == 8 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+                if (evento.mouse.x >= LARGURA_TELA / 2 - 500 && evento.mouse.x <= LARGURA_TELA / 2 + 500 && evento.mouse.y >= ALTURA_TELA / 2 - 150 && evento.mouse.y <= ALTURA_TELA / 2 + 50) {
+                    if (evento.mouse.y >= ALTURA_TELA / 2 - 60 && evento.mouse.y <= ALTURA_TELA / 2 + 10) {
+                        if (evento.mouse.x >= LARGURA_TELA / 2 - 175 && evento.mouse.x <= LARGURA_TELA / 2 - 10) {
+                            printf("Carregando o jogo...\n");
+                            leSave(&turno, &rodada, &segundos, &minutos, &horas, &totPecasA, &totPecasV, &totDicasV, &totDicasA, situacaoAux, jogo);
+                            limpaTela();
+                            inicializarStruct(&movDica, jogo);
+                            inicializarStruct(&podeAndarPosicoes, jogo);
+                            inicializarStruct(&podeComerArcoGPosicoes, jogo);
+                            inicializarStruct(&podeComerArcoPPosicoes, jogo);
+                            situacao = situacaoAux;
+                            pecaEscolhida.i = -1;
+                            situacaoDJogo = 0;
+                            podeJogar = 0;
+                            dica = 0;
+                            escreveu = 0;
+                            salvou = -1;
+                            if (situacaoAux == 3) {
+                                vezDoComputador = 0;
+                                matou = 0;
+                            }
+                        } else if (evento.mouse.x >= LARGURA_TELA / 2 + 10 && evento.mouse.x <= LARGURA_TELA / 2 + 175) {
+                            printf("Recomecou...\n");
+                            turno = 'R';
+                            totPecasA = 12;
+                            totPecasV = 12;
+                            totDicasV = 2;
+                            totDicasA = 2;
+                            iniciarTabuleiro(jogo);
+                            rodada = 0;
+                            segundos = 0;
+                            minutos = 0;
+                            horas = 0;
+                            salvou = -1;
+                            limpaTela();
+                            inicializarStruct(&movDica, jogo);
+                            inicializarStruct(&podeAndarPosicoes, jogo);
+                            inicializarStruct(&podeComerArcoGPosicoes, jogo);
+                            inicializarStruct(&podeComerArcoPPosicoes, jogo);
+                            situacao = situacaoAux;
+                            situacaoAux = situacaoAux;
+                            situacaoDJogo = 0;
+                            podeJogar = 0;
+                            pecaEscolhida.i = -1;
+                            dica = 0;
+                            matou = 0;
+                            escreveu = 0;
+                        }
+                    }
+                } else {
+                    situacao = 1;
+                    situacaoAux = 1;
+                }
+                al_rest(timeSleep);
             }
         }
         switch (situacao)
@@ -2141,8 +2218,9 @@ int main()
                     atualizaVetoresTempo(horas, minutos, segundos, horasPvc, minutosPvc, segundosPvc);
                 }
                 escreveu = 1;
+                escreveHistoricoTempo(horasPvp, minutosPvp, segundosPvp, horasPvc, minutosPvc, segundosPvc);
+                limpaSave(situacaoAux);
             }
-            escreveHistoricoTempo(horasPvp, minutosPvp, segundosPvp, horasPvc, minutosPvc, segundosPvc);
 
             al_clear_to_color(al_map_rgb(255, 255, 255));
             if (turno == 'R') {
@@ -2174,9 +2252,16 @@ int main()
 
             al_draw_rectangle(xBotao, yBotao + 180, xBotao + 280, yBotao + 250, al_map_rgb(0, 0, 0), 2);
             al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 4 + 250, ALLEGRO_ALIGN_CENTER, "Menu");
+
+            if (salvou == 1) {
+                al_draw_text(fontTexto, al_map_rgb(0, 255, 0), 10, 10, ALLEGRO_ALIGN_LEFT, "Jogo salvo com sucesso.");
+            } else if (salvou == 0) {
+                al_draw_text(fontTexto, al_map_rgb(255, 0, 0), 10, 10, ALLEGRO_ALIGN_LEFT, "Erro ao salvar o jogo.");
+            }
             al_flip_display();
             break;
         case 8:
+            printf("situacao: %d\n", situacao);
             al_draw_rectangle(LARGURA_TELA / 2 - 500, ALTURA_TELA / 2 - 150, LARGURA_TELA / 2 + 500, ALTURA_TELA / 2 + 50, al_map_rgb(0, 0, 0), 5);
             al_draw_filled_rectangle(LARGURA_TELA / 2 - 495, ALTURA_TELA / 2 - 145, LARGURA_TELA / 2 + 495, ALTURA_TELA / 2 + 45, al_map_rgb(255, 255, 255));
 
