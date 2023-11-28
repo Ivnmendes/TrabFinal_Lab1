@@ -21,6 +21,7 @@
 void limpaTela() {
     system(CLEAR);
 }
+
 typedef struct posicao {
     int i[12];
     int j[12];
@@ -34,6 +35,13 @@ typedef struct peca {
     float y;
     float raio;
 } Peca;
+
+void inicializarStruct(Posicao *p) {
+    for (int i = 0; i < 12; i++) {
+        p->i[i] = -1;
+        p->j[i] = -1;
+    }
+}
 
 void inicializarArcoP (Peca arcoP[24], Peca jogo[TAM][TAM]) {
     for (int i = 0, j = 0, k = 5; i < 24; i++, j++) {
@@ -485,26 +493,6 @@ void verificarLivre(int vetPos[], Peca tabuleiro[TAM][TAM], int posI, int posJ) 
     cont++;
 }
 
-void iniciarTabuleiro (Peca jogo[TAM][TAM]) {
-        for (int i = 0, y = 0; i < TAM; i++, y+=67) {
-            for (int j = 0, x = 0; j < TAM; j++, x+=87) {
-                jogo[i][j].i = i;
-                jogo[i][j].j = j;
-                
-                if (i == 0 || i == 1) {
-                    jogo[i][j].time = 'B';
-                } else if (i == 4 || i == 5){
-                    jogo[i][j].time = 'R';
-                } else {
-                jogo[i][j].time = '-';
-                }
-                jogo[i][j].x = 175+x;
-                jogo[i][j].y = 140+y;
-                jogo[i][j].raio = 30;
-            }
-        }
-}
-
 void podeAndar (Peca jogo[TAM][TAM], Peca pecaSelecionada, Posicao *posicaoAnda) {
     if (pecaSelecionada.time != '-') {
         int cont = 0;
@@ -517,67 +505,10 @@ void podeAndar (Peca jogo[TAM][TAM], Peca pecaSelecionada, Posicao *posicaoAnda)
                     posicaoAnda->i[cont] = ni;
                     posicaoAnda->j[cont] = nj;
                     cont++;
-
                 }
             }
         }
     }
-}
-
-void inicializarStruct(Posicao *p, Peca jogo[TAM][TAM]) {
-    for (int i = 0; i < 12; i++) {
-        p->i[i] = -1;
-        p->j[i] = -1;
-    }
-}
-
-void atualizarTabuleiro (Peca jogo[TAM][TAM], ALLEGRO_BITMAP *tabuleiro, Posicao mostrarPecas, Posicao podeAndarPosicoes, Posicao podeComerArcoPPosicoes, Posicao podeComerArcoGPosicoes, Posicao movDica, ALLEGRO_COLOR corTrasparente, int *podeJogar, int situacaoDJogo, int dica, int vezDoComputador) {
-    al_clear_to_color(al_map_rgb(255, 255, 255));
-    al_draw_scaled_bitmap(tabuleiro, 0, 0, al_get_bitmap_width(tabuleiro), al_get_bitmap_height(tabuleiro), 0, 0, 800, 600, 0);
-    for (int i = 0, y = 0; i < TAM; i++, y+=67) {
-        for (int j = 0, x = 0; j < TAM; j++, x+=87) {
-            if (jogo[i][j].time == 'R') {
-                al_draw_filled_circle(175+x, 140+y, 30, al_map_rgb(255, 0, 0));
-
-            } else if (jogo[i][j].time == 'B') {
-                al_draw_filled_circle(175+x, 140+y, 30, al_map_rgb(0, 0, 255));
-            }
-            
-        }
-    }
-
-    if (dica) {
-        if (movDica.i[0] != -1 && movDica.j[0] != -1) {
-            al_draw_circle(175 + movDica.j[0] * 87, 140 + movDica.i[0] * 67, 31, al_map_rgb(255, 165, 0), 4);
-        }
-        if (movDica.i[1] != -1 && movDica.j[1] != -1) {
-            al_draw_circle(175 + movDica.j[1] * 87, 140 + movDica.i[1] * 67, 31, al_map_rgb(255, 165, 0), 4);      
-        }
-    }
-
-    if (situacaoDJogo) {
-        for (int i = 0; i < 8; i++) {
-            if (podeAndarPosicoes.i[i] != -1 && podeAndarPosicoes.j[i] != -1) {
-                al_draw_filled_circle(175 + podeAndarPosicoes.j[i] * 87, 140 + podeAndarPosicoes.i[i] * 67, 30, corTrasparente);
-                *podeJogar = 1;
-            }
-            if (podeComerArcoPPosicoes.i[i] != - 1) {
-                al_draw_filled_circle(175 + podeComerArcoPPosicoes.j[i] * 87, 140 + podeComerArcoPPosicoes.i[i] * 67, 30, corTrasparente);
-                *podeJogar = 1;
-            }
-            if (podeComerArcoGPosicoes.i[i] != - 1) {
-                al_draw_filled_circle(175 + podeComerArcoGPosicoes.j[i] * 87, 140 + podeComerArcoGPosicoes.i[i] * 67, 30, corTrasparente);
-                *podeJogar = 1;
-            }
-        }
-    } else if (!situacaoDJogo && !vezDoComputador && !dica){
-        for (int i = 0; i < 12; i++) {
-            if (mostrarPecas.i[i] != -1 && mostrarPecas.j[i] != -1) {
-                al_draw_circle(175 + mostrarPecas.j[i] * 87, 140 + mostrarPecas.i[i] * 67, 31, al_map_rgb(0, 255, 0), 4);
-            }
-        }
-    }
-
 }
 
 void mostrarPossiveisJogadas (Peca jogo[TAM][TAM], char turno, Posicao *mostrarPecas) {
@@ -589,13 +520,13 @@ void mostrarPossiveisJogadas (Peca jogo[TAM][TAM], char turno, Posicao *mostrarP
     int cont = 0;
     int vetL[4];
 
-    inicializarStruct(&posicaoPecasPossiveis, jogo);
+    inicializarStruct(&posicaoPecasPossiveis);
     
     for (int i = 0; i < TAM; i++) {
         for (int j = 0; j < TAM; j++) {
-            inicializarStruct(&posicaoAnda, jogo);
-            inicializarStruct(&posicaoComerArcoP, jogo);
-            inicializarStruct(&posicaoComerArcoG, jogo);
+            inicializarStruct(&posicaoAnda);
+            inicializarStruct(&posicaoComerArcoP);
+            inicializarStruct(&posicaoComerArcoG);
             if (jogo[i][j].time == turno) {
                 podeAndar(jogo, jogo[i][j], &posicaoAnda);
                 if (posicaoAnda.i[0] != -1) {
@@ -631,41 +562,6 @@ void mostrarPossiveisJogadas (Peca jogo[TAM][TAM], char turno, Posicao *mostrarP
     *mostrarPecas = posicaoPecasPossiveis;
 }
 
-void exibirJogo (Peca jogo[TAM][TAM], Posicao mostrarPecas, Posicao podeAndarPosicoes, Posicao podeComerArcoPPosicoes, Posicao podeComerArcoGPosicoes, Posicao movDica, ALLEGRO_BITMAP *tabuleiro, ALLEGRO_FONT *font, int horas, int minutos, int segundos, int turno, ALLEGRO_COLOR corTrasparente, int vezDoComputador, int situacaoDJogo, int *podeJogar, int totDicasV, int totDicasA, int dica) {    
-    char vetColunas[] = {'A', 'B', 'C', 'D', 'E', 'F'};
-    int auxPodeJogar = *podeJogar;
-    mostrarPossiveisJogadas(jogo, turno, &mostrarPecas);
-    atualizarTabuleiro(jogo, tabuleiro, mostrarPecas, podeAndarPosicoes, podeComerArcoPPosicoes, podeComerArcoGPosicoes, movDica, corTrasparente, &auxPodeJogar, situacaoDJogo, dica, vezDoComputador);
-    *podeJogar = auxPodeJogar;
-    al_draw_textf(font, al_map_rgb(0, 0, 0), LARGURA_TELA, 10, ALLEGRO_ALIGN_RIGHT, "Tempo: %02d:%02d:%02d", horas, minutos, segundos);
-    
-    al_draw_rectangle(LARGURA_TELA - 190, ALTURA_TELA - 240, LARGURA_TELA, ALTURA_TELA - 170, al_map_rgb(0, 0, 0), 2);
-    al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA - 95, ALTURA_TELA - 220, ALLEGRO_ALIGN_CENTER, "Dica");
-    al_draw_rectangle(LARGURA_TELA - 190, ALTURA_TELA - 150, LARGURA_TELA, ALTURA_TELA - 80, al_map_rgb(0, 0, 0), 2);
-    al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA - 95, ALTURA_TELA - 130, ALLEGRO_ALIGN_CENTER, "Pausar");
-    
-    if (turno == 'R' && vezDoComputador == 0) {
-        al_draw_text(font, al_map_rgb(255, 0, 0), LARGURA_TELA, 40, ALLEGRO_ALIGN_RIGHT, "Turno do vermelho");
-        al_draw_textf(font, al_map_rgb(255, 0, 0), LARGURA_TELA, 80, ALLEGRO_ALIGN_RIGHT, "Total de dicas: %d", totDicasV);
-    } else if (turno == 'B' && vezDoComputador == 0){
-        al_draw_text(font, al_map_rgb(0, 0, 255), LARGURA_TELA, 40, ALLEGRO_ALIGN_RIGHT, "Turno do azul");
-        al_draw_textf(font, al_map_rgb(0, 0, 255), LARGURA_TELA, 80, ALLEGRO_ALIGN_RIGHT, "Total de dicas: %d", totDicasA);
-    } else {
-        al_draw_text(font, al_map_rgb(0, 0, 255), LARGURA_TELA, 40, ALLEGRO_ALIGN_RIGHT, "Computador jogando");
-    }
-
-    al_draw_line(0, 610, 800, 610, al_map_rgb(0, 0, 0), 4);
-    for (int i = 1, x = 0; i <= 6; i++, x+=87) {
-        al_draw_line(175+x, 620, 175+x, 600, al_map_rgb(0, 0, 0), 4);
-        al_draw_textf(font, al_map_rgb(0, 0, 0), 175+x, 630, ALLEGRO_ALIGN_CENTER, "%c", vetColunas[i-1]);
-    }
-    al_draw_line(800, 610, 800, 0, al_map_rgb(0, 0, 0), 4);
-    for (int i = 0, y = 0; i < 6; i++, y+=67) {
-        al_draw_line(810, 143+y, 790, 143+y, al_map_rgb(0, 0, 0), 4);
-        al_draw_textf(font, al_map_rgb(0, 0, 0), 830, 135+y, ALLEGRO_ALIGN_CENTER, "%d", i);
-    }
-}
-
 void descobrirMovimentoPossivel (Peca jogo[TAM][TAM], Posicao *movimentoEcontrado, int *matou, int dica, char time) {
     Posicao jogadaPossivel;
     Peca pecaAtual;
@@ -677,7 +573,7 @@ void descobrirMovimentoPossivel (Peca jogo[TAM][TAM], Posicao *movimentoEcontrad
     for (int i = 0; i < TAM; i++) {
         for (int j = 0; j < TAM; j++) {
             if (jogo[i][j].time == time) {
-                inicializarStruct(&jogadaPossivel, jogo);
+                inicializarStruct(&jogadaPossivel);
                 pecaAtual.i = i;
                 pecaAtual.j = j;
                 pecaAtual.time = time;
@@ -717,7 +613,7 @@ void descobrirMovimentoPossivel (Peca jogo[TAM][TAM], Posicao *movimentoEcontrad
                     break;
                 }
                 if (jogo[i][j].time == time) {
-                    inicializarStruct(&jogadaPossivel, jogo);
+                    inicializarStruct(&jogadaPossivel);
                     pecaAtual.i = i;
                     pecaAtual.j = j;
                     pecaAtual.time = time;
@@ -826,7 +722,7 @@ void descobrirMovimentoPossivel (Peca jogo[TAM][TAM], Posicao *movimentoEcontrad
         for (int i = TAM - 1; i >= 0; i--) {
             for (int j = TAM - 1; j >= 0; j--) {
                 if (jogo[i][j].time == time) {
-                    inicializarStruct(&jogadaPossivel, jogo);
+                    inicializarStruct(&jogadaPossivel);
                     pecaAtual.i = i;
                     pecaAtual.j = j;
                     pecaAtual.time = time;
@@ -865,7 +761,7 @@ void descobrirMovimentoPossivelOp2 (Peca jogo[TAM][TAM], Posicao *movimentoEcont
     for (int i = 0; i < TAM; i++) {
         for (int j = 0; j < TAM; j++) {
             if (jogo[i][j].time == time) {
-                inicializarStruct(&jogadaPossivel, jogo);
+                inicializarStruct(&jogadaPossivel);
                 pecaAtual.i = i;
                 pecaAtual.j = j;
                 pecaAtual.time = time;
@@ -905,7 +801,7 @@ void descobrirMovimentoPossivelOp2 (Peca jogo[TAM][TAM], Posicao *movimentoEcont
                     break;
                 }
                 if (jogo[i][j].time == time) {
-                    inicializarStruct(&jogadaPossivel, jogo);
+                    inicializarStruct(&jogadaPossivel);
                     pecaAtual.i = i;
                     pecaAtual.j = j;
                     pecaAtual.time = time;
@@ -1138,7 +1034,7 @@ void descobrirMovimentoPossivelOp2 (Peca jogo[TAM][TAM], Posicao *movimentoEcont
         for (int i = TAM - 1; i >= 0; i--) {
             for (int j = TAM - 1; j >= 0; j--) {
                 if (jogo[i][j].time == time) { 
-                    inicializarStruct(&jogadaPossivel, jogo);
+                    inicializarStruct(&jogadaPossivel);
                     pecaAtual.i = i;
                     pecaAtual.j = j;
                     pecaAtual.time = time;
@@ -1175,9 +1071,9 @@ void movimento (Peca jogo[TAM][TAM], int iAtual, int jAtual, int iFuturo, int jF
 void jogadaPossivel (Posicao *podeAndarP, Posicao *podeComerArcP, Posicao *podeComerArcG, int vetL[], Peca jogo[TAM][TAM], Peca pecaEscolhida, int podeJogar, int *situacaoDJogo) {
     Posicao podeAndarPosicoes, podeComerArcoPPosicoes, podeComerArcoGPosicoes;
     
-    inicializarStruct(&podeAndarPosicoes, jogo);
-    inicializarStruct(&podeComerArcoPPosicoes, jogo);
-    inicializarStruct(&podeComerArcoGPosicoes, jogo);
+    inicializarStruct(&podeAndarPosicoes);
+    inicializarStruct(&podeComerArcoPPosicoes);
+    inicializarStruct(&podeComerArcoGPosicoes);
     if (pecaEscolhida.i != -1) {
         podeAndar(jogo, pecaEscolhida, &podeAndarPosicoes);
         if (pecaEscolhida.i == 1 || pecaEscolhida.i == 4 || pecaEscolhida.j == 1 || pecaEscolhida.j == 4) {
@@ -1199,6 +1095,151 @@ void jogadaPossivel (Posicao *podeAndarP, Posicao *podeComerArcP, Posicao *podeC
     }
 }
 
+void iniciarTabuleiro (Peca jogo[TAM][TAM]) {
+        for (int i = 0; i < TAM; i++) {
+            for (int j = 0; j < TAM; j++) {
+                jogo[i][j].i = i;
+                jogo[i][j].j = j;
+                
+                if (i == 0 || i == 1) {
+                    jogo[i][j].time = 'B';
+                } else if (i == 4 || i == 5){
+                    jogo[i][j].time = 'R';
+                } else {
+                jogo[i][j].time = '-';
+                }
+                jogo[i][j].x = 175+ j * 87;
+                jogo[i][j].y = 140+ i * 67;
+                jogo[i][j].raio = 30;
+            }
+        }
+}
+
+void atualizarTabuleiro (Peca jogo[TAM][TAM], ALLEGRO_BITMAP *tabuleiro, Posicao mostrarPecas, Posicao podeAndarPosicoes, Posicao podeComerArcoPPosicoes, Posicao podeComerArcoGPosicoes, Posicao movDica, ALLEGRO_COLOR corTrasparente, int *podeJogar, int situacaoDJogo, int dica, int vezDoComputador) {
+    al_clear_to_color(al_map_rgb(255, 255, 255));
+    al_draw_scaled_bitmap(tabuleiro, 0, 0, al_get_bitmap_width(tabuleiro), al_get_bitmap_height(tabuleiro), 0, 0, 800, 600, 0);
+    for (int i = 0, y = 0; i < TAM; i++, y+=67) {
+        for (int j = 0, x = 0; j < TAM; j++, x+=87) {
+            if (jogo[i][j].time == 'R') {
+                al_draw_filled_circle(175+x, 140+y, 30, al_map_rgb(255, 0, 0));
+
+            } else if (jogo[i][j].time == 'B') {
+                al_draw_filled_circle(175+x, 140+y, 30, al_map_rgb(0, 0, 255));
+            }
+            
+        }
+    }
+
+    if (dica) {
+        if (movDica.i[0] != -1 && movDica.j[0] != -1) {
+            al_draw_circle(175 + movDica.j[0] * 87, 140 + movDica.i[0] * 67, 31, al_map_rgb(255, 165, 0), 4);
+        }
+        if (movDica.i[1] != -1 && movDica.j[1] != -1) {
+            al_draw_circle(175 + movDica.j[1] * 87, 140 + movDica.i[1] * 67, 31, al_map_rgb(255, 165, 0), 4);      
+        }
+    }
+
+    if (situacaoDJogo) {
+        for (int i = 0; i < 8; i++) {
+            if (podeAndarPosicoes.i[i] != -1 && podeAndarPosicoes.j[i] != -1) {
+                al_draw_filled_circle(175 + podeAndarPosicoes.j[i] * 87, 140 + podeAndarPosicoes.i[i] * 67, 30, corTrasparente);
+                *podeJogar = 1;
+            }
+            if (podeComerArcoPPosicoes.i[i] != - 1) {
+                al_draw_filled_circle(175 + podeComerArcoPPosicoes.j[i] * 87, 140 + podeComerArcoPPosicoes.i[i] * 67, 30, corTrasparente);
+                *podeJogar = 1;
+            }
+            if (podeComerArcoGPosicoes.i[i] != - 1) {
+                al_draw_filled_circle(175 + podeComerArcoGPosicoes.j[i] * 87, 140 + podeComerArcoGPosicoes.i[i] * 67, 30, corTrasparente);
+                *podeJogar = 1;
+            }
+        }
+    } else if (!situacaoDJogo && !vezDoComputador && !dica){
+        for (int i = 0; i < 12; i++) {
+            if (mostrarPecas.i[i] != -1 && mostrarPecas.j[i] != -1) {
+                al_draw_circle(175 + mostrarPecas.j[i] * 87, 140 + mostrarPecas.i[i] * 67, 31, al_map_rgb(0, 255, 0), 4);
+            }
+        }
+    }
+
+}
+
+void exibirJogo (Peca jogo[TAM][TAM], Posicao mostrarPecas, Posicao podeAndarPosicoes, Posicao podeComerArcoPPosicoes, Posicao podeComerArcoGPosicoes, Posicao movDica, ALLEGRO_BITMAP *tabuleiro, ALLEGRO_FONT *font, int rodada, int horas, int minutos, int segundos, char turno, ALLEGRO_COLOR corTrasparente, int vezDoComputador, int situacaoDJogo, int *podeJogar, int totDicasV, int totDicasA, int dica) {    
+    char vetColunas[] = {'A', 'B', 'C', 'D', 'E', 'F'};
+    int auxPodeJogar = *podeJogar;
+    mostrarPossiveisJogadas(jogo, turno, &mostrarPecas);
+    atualizarTabuleiro(jogo, tabuleiro, mostrarPecas, podeAndarPosicoes, podeComerArcoPPosicoes, podeComerArcoGPosicoes, movDica, corTrasparente, &auxPodeJogar, situacaoDJogo, dica, vezDoComputador);
+    *podeJogar = auxPodeJogar;
+
+    al_draw_textf(font, al_map_rgb(0, 0, 0), LARGURA_TELA, 10, ALLEGRO_ALIGN_RIGHT, "Rodada: %d", rodada);
+    al_draw_textf(font, al_map_rgb(0, 0, 0), LARGURA_TELA, 40, ALLEGRO_ALIGN_RIGHT, "Tempo: %02d:%02d:%02d", horas, minutos, segundos);
+    if (turno == 'R' && vezDoComputador == 0) {
+        al_draw_text(font, al_map_rgb(255, 0, 0), LARGURA_TELA, 70, ALLEGRO_ALIGN_RIGHT, "Turno do vermelho");
+        al_draw_textf(font, al_map_rgb(255, 0, 0), LARGURA_TELA, 100, ALLEGRO_ALIGN_RIGHT, "Total de dicas: %d", totDicasV);
+    } else if (turno == 'B' && vezDoComputador == 0){
+        al_draw_text(font, al_map_rgb(0, 0, 255), LARGURA_TELA, 70, ALLEGRO_ALIGN_RIGHT, "Turno do azul");
+        al_draw_textf(font, al_map_rgb(0, 0, 255), LARGURA_TELA, 100, ALLEGRO_ALIGN_RIGHT, "Total de dicas: %d", totDicasA);
+    } else {
+        al_draw_text(font, al_map_rgb(0, 0, 255), LARGURA_TELA, 70, ALLEGRO_ALIGN_RIGHT, "Computador jogando");
+    }
+    
+    al_draw_rectangle(LARGURA_TELA - 190, ALTURA_TELA - 240, LARGURA_TELA, ALTURA_TELA - 170, al_map_rgb(0, 0, 0), 2);
+    al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA - 95, ALTURA_TELA - 220, ALLEGRO_ALIGN_CENTER, "Dica");
+    al_draw_rectangle(LARGURA_TELA - 190, ALTURA_TELA - 150, LARGURA_TELA, ALTURA_TELA - 80, al_map_rgb(0, 0, 0), 2);
+    al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA - 95, ALTURA_TELA - 130, ALLEGRO_ALIGN_CENTER, "Pausar");
+
+    al_draw_line(0, 610, 800, 610, al_map_rgb(0, 0, 0), 4);
+    for (int i = 1, x = 0; i <= 6; i++, x+=87) {
+        al_draw_line(175+x, 620, 175+x, 600, al_map_rgb(0, 0, 0), 4);
+        al_draw_textf(font, al_map_rgb(0, 0, 0), 175+x, 630, ALLEGRO_ALIGN_CENTER, "%c", vetColunas[i-1]);
+    }
+    al_draw_line(800, 610, 800, 0, al_map_rgb(0, 0, 0), 4);
+    for (int i = 0, y = 0; i < 6; i++, y+=67) {
+        al_draw_line(810, 143+y, 790, 143+y, al_map_rgb(0, 0, 0), 4);
+        al_draw_textf(font, al_map_rgb(0, 0, 0), 830, 135+y, ALLEGRO_ALIGN_CENTER, "%d", i);
+    }
+}
+
+void iniciaJogo (char *turno, int *rodada, int *segundos, int *minutos, int *horas, int *totPecasA, int *totPecasV, int *totDicasV, int *totDicasA, int *salvou, int *podeJogar, int *dica, int *escreveu, int *situacao, int *situacaoDJogo, int *vezDoComputador, int *matou, int situacaoAux, Peca *pecaEscolhida, Posicao *movDica, Posicao *podeAndarPosicoes, Posicao *podeComerArcoGPosicoes, Posicao *podeComerArcoPPosicoes, Posicao *mostrarPecas, Peca jogo[TAM][TAM]) {
+    if (*situacao != 8) {
+    *turno = 'R';
+    *rodada = 1;
+    *segundos = 0;
+    *minutos = 0;
+    *horas = 0;
+    *totPecasA = 12;
+    *totPecasV = 12;
+    *totDicasV = 2;
+    *totDicasA = 2;
+    iniciarTabuleiro(jogo);
+    }
+    Posicao auxMovDica;
+    Posicao auxPodeAndarPosicoes;
+    Posicao auxPodeComerArcoGPosicoes;
+    Posicao auxPodeComerArcoPPosicoes;
+    Posicao auxMostrarPecas;
+    *salvou = -1;
+    *podeJogar = 0;
+    *dica = 0;
+    *escreveu = 0;
+    *situacao = situacaoAux;
+    pecaEscolhida->i = -1;
+    *situacaoDJogo = 0;
+    inicializarStruct(&auxMovDica);
+    inicializarStruct(&auxPodeAndarPosicoes);
+    inicializarStruct(&auxPodeComerArcoGPosicoes);
+    inicializarStruct(&auxPodeComerArcoPPosicoes);
+    inicializarStruct(&auxMostrarPecas);
+    *movDica = auxMovDica;
+    *podeAndarPosicoes = auxPodeAndarPosicoes;
+    *podeComerArcoGPosicoes = auxPodeComerArcoGPosicoes;
+    *podeComerArcoPPosicoes = auxPodeComerArcoPPosicoes;
+    *mostrarPecas = auxMostrarPecas;
+    if (situacaoAux == 3) {
+        *vezDoComputador = 0;
+        *matou = 0;
+    }
+}
 
 int lerHistoricoTempo (int horasPvP[5], int minutosPvP[5], int segundosPvP[5], int horasPvC[5], int minutosPvC[5], int segundosPvC[5], int *totPartPvp, int *vitoriasAPvp, int *vitoriasVPvp, int *totPartPvc, int *vitoriasAPvc, int *vitoriasVPvc) {
     FILE *arq;
@@ -1392,18 +1433,6 @@ int escreveSave (char turno, int rodada, int segundos, int minutos, int horas, i
 int leSave (char *turno, int *rodada, int *segundos, int *minutos, int *horas, int *totPecasA, int *totPecasV, int *totDicasV, int *totDicasA, int situacao, Peca jogo[TAM][TAM]) {
     FILE *arq;
 
-    char turnoAux;
-    int rodadaAux;
-    int segundosAux;
-    int minutosAux;
-    int horasAux;
-    int totPecasAAux;
-    int totPecasVAux;
-    int totDicasVAux;
-    int totDicasAAux;
-    int vezDoComputadorAux;
-    
-
     if (situacao == 2) {
         arq = fopen("./saves/savePvP.txt", "r");
     } else {
@@ -1416,52 +1445,42 @@ int leSave (char *turno, int *rodada, int *segundos, int *minutos, int *horas, i
     }
     
     fseek(arq, 18, SEEK_SET);
-    fscanf(arq, "%c\n", &turnoAux);
-    *turno = turnoAux;
+    fscanf(arq, "%c\n", turno);
 
     fseek(arq, 6, SEEK_CUR);
-    fscanf(arq, "%d\n", &rodadaAux);
-    *rodada = rodadaAux;
+    fscanf(arq, "%d\n", rodada);
 
     fseek(arq, 6, SEEK_CUR);
-    fscanf(arq, "%d\n", &segundosAux);
-    *segundos = segundosAux;
+    fscanf(arq, "%d\n", segundos);
     
     fseek(arq, 6, SEEK_CUR);
-    fscanf(arq, "%d\n", &minutosAux);
-    *minutos = minutosAux;
+    fscanf(arq, "%d\n", minutos);
     
     fseek(arq, 6, SEEK_CUR);
-    fscanf(arq, "%d\n", &horasAux);
-    *horas = horasAux;
+    fscanf(arq, "%d\n", horas);
 
     fseek(arq, 6, SEEK_CUR);
-    fscanf(arq, "%d\n", &totPecasAAux);
-    *totPecasA = totPecasAAux;
+    fscanf(arq, "%d\n", totPecasA);
 
     fseek(arq, 6, SEEK_CUR);
-    fscanf(arq, "%d\n", &totPecasVAux);
-    *totPecasV = totPecasVAux;
+    fscanf(arq, "%d\n", totPecasV);
 
     fseek(arq, 6, SEEK_CUR);
-    fscanf(arq, "%d\n", &totDicasVAux);
-    *totDicasV = totDicasVAux;
+    fscanf(arq, "%d\n", totDicasV);
 
     if (situacao == 2) {
         fseek(arq, 6, SEEK_CUR);
-        fscanf(arq, "%d\n", &totDicasAAux);
-        *totDicasA = totDicasAAux;
-        
+        fscanf(arq, "%d\n", totDicasA);
     }
 
     fseek(arq, 12, SEEK_CUR);
-    for (int i = 0, y = 0; i < TAM; i++, y+=67) {
-        for (int j = 0, x = 0; j < TAM; j++, x+=87) {
+    for (int i = 0; i < TAM; i++) {
+        for (int j = 0; j < TAM; j++) {
             fscanf(arq, "%c\n", &jogo[i][j].time);
             jogo[i][j].i = i;
             jogo[i][j].j = j;
-            jogo[i][j].x = 175+x;
-            jogo[i][j].y = 140+y;
+            jogo[i][j].x = 175+ j * 87;
+            jogo[i][j].y = 140+ i * 67;
             jogo[i][j].raio = 30;
             fseek(arq, 3, SEEK_CUR);
         }
@@ -1505,8 +1524,7 @@ void limpaSave (int situacao) {
     fclose(arq);
 }
 
-int main()
-{
+int main() {
     ALLEGRO_DISPLAY *janela = NULL;
     ALLEGRO_FONT *font = NULL;
     ALLEGRO_FONT *fontTitulo = NULL;
@@ -1575,14 +1593,15 @@ int main()
     }
     al_start_timer(timerClick);
 
+    al_set_new_display_option(ALLEGRO_SAMPLE_BUFFERS, 20, ALLEGRO_SUGGEST);
+    al_set_new_display_option(ALLEGRO_SAMPLES, 8, ALLEGRO_SUGGEST);
+    al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
+    al_set_blender(ALLEGRO_ADD, ALLEGRO_ALPHA, ALLEGRO_INVERSE_ALPHA);
     janela = al_create_display(LARGURA_TELA, ALTURA_TELA);
     if (!janela) {
         printf("Falha ao criar a janela");
         return -1;
     }
-    al_set_new_display_option(ALLEGRO_SAMPLE_BUFFERS, 20, ALLEGRO_SUGGEST);
-    al_set_new_display_option(ALLEGRO_SAMPLES, 8, ALLEGRO_SUGGEST);
-    al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
 
     font = al_load_font("./source/font.ttf", 30, 0);
     if (!font) {
@@ -1631,7 +1650,7 @@ int main()
         return -1;
     }
 
-    al_set_blender(ALLEGRO_ADD, ALLEGRO_ALPHA, ALLEGRO_INVERSE_ALPHA);
+    
 
     al_register_event_source(fila_eventos, al_get_display_event_source(janela));
     al_register_event_source(fila_eventos, al_get_mouse_event_source());
@@ -1643,10 +1662,8 @@ int main()
     int tempoDeEspera = 0;
     int rodada;
 
-    int timeSleep = 1;
-    int xBotao = LARGURA_TELA / 2 - 140, yBotao = ALTURA_TELA / 4 + 50;
-    ALLEGRO_COLOR corVermelhoPeca = al_map_rgb(255, 0, 0);
-    ALLEGRO_COLOR corAzulPeca = al_map_rgb(0, 0, 255);
+    const float TIMESLEEP = 1;
+    const int XBOTAO = LARGURA_TELA / 2 - 140, YBOTAO = ALTURA_TELA / 4 + 50;
     ALLEGRO_COLOR corTrasparente = al_map_rgba_f(1, 1, 0, 0.7);
     ALLEGRO_COLOR corBrancoTrasparente = al_map_rgba_f(1, 1, 1, 0.8);
 
@@ -1656,11 +1673,10 @@ int main()
     char turno = 'R';
     char vetColunas[] = {'A', 'B', 'C', 'D', 'E', 'F'};
     char auxTurno[9];
-    int totPecasV, totPecasA, totDicasV, totDicasA, totPartPvp, vitoriasAPvp, vitoriasVPvp, totPartPvc, vitoriasAPvc, vitoriasVPvc;
+    int totPecasV, totPecasA, totDicasV, totDicasA, totPartPvp, vitoriasAPvp, vitoriasVPvp, totPartPvc, vitoriasAPvc, vitoriasVPvc, pagAjuda;
     int vetL[4], horasPvp[5], minutosPvp[5], segundosPvp[5], horasPvc[5], minutosPvc[5], segundosPvc[5];
     int op;
     int vezDoComputador = 0, matou, dica, escreveu, salvou, clicou = 0, fimDaPartida;
-    int pagAjuda;
     
     Peca jogo[TAM][TAM];
     Peca pecaEscolhida;
@@ -1734,82 +1750,38 @@ int main()
             }
 
             if (situacao == 1 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && !clicou) {
-                if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 280 && evento.mouse.y >= yBotao && evento.mouse.y <= yBotao + 70) {
+                if (evento.mouse.x >= XBOTAO && evento.mouse.x <= XBOTAO + 280 && evento.mouse.y >= YBOTAO && evento.mouse.y <= YBOTAO + 70) {
                     situacao = 2;
                     if (contemSave(situacao)) {
                         situacao = 8;
                         situacaoAux = 2;
                     } else {
-                        turno = 'R';
-                        rodada = 1;
-                        segundos = 0;
-                        minutos = 0;
-                        horas = 0;
-                        totPecasA = 12;
-                        totPecasV = 12;
-                        totDicasA = 2;
-                        totDicasV = 2;
-                        salvou = -1;
-                        podeJogar = 0;
-                        dica = 0;
-                        escreveu = 0;
-                        situacao = 2;
                         situacaoAux = 2;
-                        situacaoDJogo = 0;
-                        pecaEscolhida.i = -1;
-                        limpaTela();
-                        iniciarTabuleiro(jogo);
-                        inicializarStruct(&movDica, jogo);
-                        inicializarStruct(&podeAndarPosicoes, jogo);
-                        inicializarStruct(&podeComerArcoGPosicoes, jogo);
-                        inicializarStruct(&podeComerArcoPPosicoes, jogo);
-                        inicializarStruct(&mostrarPecas, jogo);
+                        iniciaJogo(&turno, &rodada, &segundos, &minutos, &horas, &totPecasA, &totPecasV, &totDicasV, &totDicasA, &salvou, &podeJogar, &dica, &escreveu, &situacao, &situacaoDJogo, &vezDoComputador, &matou, situacaoAux, &pecaEscolhida, &movDica, &podeAndarPosicoes, &podeComerArcoGPosicoes, &podeComerArcoPPosicoes, &mostrarPecas, jogo);
                     }
                     clicou = 1;
-                    milisegundos = timeSleep;
-                } else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 280 && evento.mouse.y >= yBotao + 90 && evento.mouse.y <= yBotao + 160) {
+                    milisegundos = TIMESLEEP;
+                } else if (evento.mouse.x >= XBOTAO && evento.mouse.x <= XBOTAO + 280 && evento.mouse.y >= YBOTAO + 90 && evento.mouse.y <= YBOTAO + 160) {
                     situacao = 3;
                     if (contemSave(situacao)) {
                         situacao = 8;
                         situacaoAux = 3;
                     } else {
-                        turno = 'R';
-                        rodada = 1;
-                        segundos = 0;
-                        minutos = 0;
-                        horas = 0;
-                        totPecasA = 12;
-                        totPecasV = 12;
-                        totDicasV = 2;
-                        salvou = -1;
-                        podeJogar = 0;
-                        dica = 0;
-                        matou = 0;
-                        escreveu = 0;
-                        situacao = 3;
                         situacaoAux = 3;
-                        situacaoDJogo = 0;
-                        pecaEscolhida.i = -1;
-                        limpaTela();
-                        iniciarTabuleiro(jogo);
-                        inicializarStruct(&movDica, jogo);
-                        inicializarStruct(&podeAndarPosicoes, jogo);
-                        inicializarStruct(&podeComerArcoGPosicoes, jogo);
-                        inicializarStruct(&podeComerArcoPPosicoes, jogo);
-                        inicializarStruct(&mostrarPecas, jogo);
+                        iniciaJogo(&turno, &rodada, &segundos, &minutos, &horas, &totPecasA, &totPecasV, &totDicasV, &totDicasA, &salvou, &podeJogar, &dica, &escreveu, &situacao, &situacaoDJogo, &vezDoComputador, &matou, situacaoAux, &pecaEscolhida, &movDica, &podeAndarPosicoes, &podeComerArcoGPosicoes, &podeComerArcoPPosicoes, &mostrarPecas, jogo);
                     }
                     clicou = 1;
-                    milisegundos = timeSleep;
-                } else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 280 && evento.mouse.y >= yBotao + 180 && evento.mouse.y <= yBotao + 250) {
+                    milisegundos = TIMESLEEP;
+                } else if (evento.mouse.x >= XBOTAO && evento.mouse.x <= XBOTAO + 280 && evento.mouse.y >= YBOTAO + 180 && evento.mouse.y <= YBOTAO + 250) {
                     situacao = 4;
                     pagAjuda = 1;
                     clicou = 1;
-                    milisegundos = timeSleep;
-                } else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 280 && evento.mouse.y >= yBotao + 270 && evento.mouse.y <= yBotao + 340) {
+                    milisegundos = TIMESLEEP;
+                } else if (evento.mouse.x >= XBOTAO && evento.mouse.x <= XBOTAO + 280 && evento.mouse.y >= YBOTAO + 270 && evento.mouse.y <= YBOTAO + 340) {
                     situacao = 5;
                     clicou = 1;
-                    milisegundos = timeSleep;
-                } else if (evento.mouse.x >= xBotao && evento.mouse.x <= xBotao + 280 && evento.mouse.y >= yBotao + 360 && evento.mouse.y <= yBotao + 430) {
+                    milisegundos = TIMESLEEP;
+                } else if (evento.mouse.x >= XBOTAO && evento.mouse.x <= XBOTAO + 280 && evento.mouse.y >= YBOTAO + 360 && evento.mouse.y <= YBOTAO + 430) {
                     rodando = 0;
                 }
             }
@@ -1828,7 +1800,7 @@ int main()
                                 situacaoDJogo = 1;
                                 podeJogar = 1;
                                 clicou = 1;
-                                milisegundos = timeSleep;
+                                milisegundos = TIMESLEEP;
                                 break;
                             }
                         }
@@ -1853,13 +1825,13 @@ int main()
                                     if (dica) {
                                         totDicasA--;
                                         dica = 0;
-                                        inicializarStruct(&movDica, jogo);
+                                        inicializarStruct(&movDica);
                                     }
                                 } else {
                                     if (dica) {
                                         totDicasV--;
                                         dica = 0;
-                                        inicializarStruct(&movDica, jogo);
+                                        inicializarStruct(&movDica);
                                     }
                                     strcpy(auxTurno, "Vermelho");
                                 }
@@ -1875,7 +1847,7 @@ int main()
                                 podeJogar = 0;
                                 pecaEscolhida.i = -1;
                                 clicou = 1;
-                                milisegundos = timeSleep;
+                                milisegundos = TIMESLEEP;
                                 break;
                             }
                         }
@@ -1888,7 +1860,7 @@ int main()
                                     if (dica) {
                                         totDicasA--;
                                         dica = 0;
-                                        inicializarStruct(&movDica, jogo);
+                                        inicializarStruct(&movDica);
                                     }
                                     strcpy(auxTurno, "Azul");
                                     totPecasV--;
@@ -1896,7 +1868,7 @@ int main()
                                     if (dica) {
                                         totDicasV--;
                                         dica = 0;
-                                        inicializarStruct(&movDica, jogo);
+                                        inicializarStruct(&movDica);
                                     }
                                     strcpy(auxTurno, "Vermelho");
                                     totPecasA--;
@@ -1916,9 +1888,9 @@ int main()
                                 situacaoDJogo = 0;
                                 podeJogar = 0;
                                 pecaEscolhida.i = -1;
-                                inicializarStruct(&podeComerArcoPPosicoes, jogo);
+                                inicializarStruct(&podeComerArcoPPosicoes);
                                 clicou = 1;
-                                milisegundos = timeSleep;
+                                milisegundos = TIMESLEEP;
                                 break;
                             }
                         }
@@ -1931,7 +1903,7 @@ int main()
                                     if (dica) {
                                         totDicasA--;
                                         dica = 0;
-                                        inicializarStruct(&movDica, jogo);
+                                        inicializarStruct(&movDica);
                                     }
                                     strcpy(auxTurno, "Azul");
                                     totPecasV--;
@@ -1939,7 +1911,7 @@ int main()
                                     if (dica) {
                                         totDicasV--;
                                         dica = 0;
-                                        inicializarStruct(&movDica, jogo);
+                                        inicializarStruct(&movDica);
                                     }
                                     strcpy(auxTurno, "Vermelho");
                                     totPecasA--;
@@ -1959,9 +1931,9 @@ int main()
                                 situacaoDJogo = 0;
                                 podeJogar = 0;
                                 pecaEscolhida.i = -1;
-                                inicializarStruct(&podeComerArcoGPosicoes, jogo);
+                                inicializarStruct(&podeComerArcoGPosicoes);
                                 clicou = 1;
-                                milisegundos = timeSleep;
+                                milisegundos = TIMESLEEP;
                                 break;
                             }
                         }
@@ -1975,7 +1947,7 @@ int main()
                         if (turno == 'R') {
                             if (totDicasV > 0) {
                                 dica = 1;
-                                inicializarStruct(&movDica, jogo);
+                                inicializarStruct(&movDica);
                                 if (situacao == 2) {
                                     descobrirMovimentoPossivelOp2(jogo, &movDica, &matou, dica, turno);
                                 } else if (situacao == 3) {
@@ -1985,7 +1957,7 @@ int main()
                         } else if (turno == 'B') {
                             if (totDicasA > 0) {
                                 dica = 1;
-                                inicializarStruct(&movDica, jogo);
+                                inicializarStruct(&movDica);
                                 if (situacao == 2) {
                                     descobrirMovimentoPossivelOp2(jogo, &movDica, &matou, dica, turno);
                                 } else if (situacao == 3) {
@@ -1994,10 +1966,10 @@ int main()
                             }
                         }
                         clicou = 1;
-                        milisegundos = timeSleep;
+                        milisegundos = TIMESLEEP;
                     } else if (evento.mouse.y >= ALTURA_TELA - 150 && evento.mouse.y <= ALTURA_TELA - 80) {
                         clicou = 1;
-                        milisegundos = timeSleep;
+                        milisegundos = TIMESLEEP;
                         situacao = 7;
                     }
                 }
@@ -2015,7 +1987,7 @@ int main()
                         situacao = 1;
                     }
                     clicou = 1;
-                    milisegundos = timeSleep;
+                    milisegundos = TIMESLEEP;
                 }
             }
 
@@ -2023,62 +1995,36 @@ int main()
                 if (evento.mouse.x >= 50 - 40 && evento.mouse.x <= 50 + 40 && evento.mouse.y >= 50 - 40 && evento.mouse.y <= 50 + 40) {
                     situacao = 1;
                     clicou = 1;
-                    milisegundos = timeSleep;
+                    milisegundos = TIMESLEEP;
                 }
             }
             if (situacao == 6 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && !clicou ) {
-                if (evento.mouse.y >= yBotao + 20 && evento.mouse.y <= yBotao + 100) {
-                    if (evento.mouse.x >= xBotao - 180 && evento.mouse.x <= xBotao + 70) {
-                        turno = 'R';
-                        rodada = 1;
-                        segundos = 0;
-                        minutos = 0;
-                        horas = 0;
-                        totPecasA = 12;
-                        totPecasV = 12;
-                        totDicasV = 2;
-                        totDicasA = 2;
-                        salvou = -1;
-                        podeJogar = 0;
-                        dica = 0;
-                        escreveu = 0;
-                        situacao = situacaoAux;
-                        pecaEscolhida.i = -1;
-                        situacaoDJogo = 0;
-                        limpaTela();
-                        iniciarTabuleiro(jogo);
-                        inicializarStruct(&movDica, jogo);
-                        inicializarStruct(&podeAndarPosicoes, jogo);
-                        inicializarStruct(&podeComerArcoGPosicoes, jogo);
-                        inicializarStruct(&podeComerArcoPPosicoes, jogo);
-                        inicializarStruct(&mostrarPecas, jogo);
-                        if (situacaoAux == 3) {
-                            vezDoComputador = 0;
-                            matou = 0;
-                        }
-                    } else if (evento.mouse.x >= xBotao + 180 && evento.mouse.x <= xBotao + 430) {
+                if (evento.mouse.y >= YBOTAO + 20 && evento.mouse.y <= YBOTAO + 100) {
+                    if (evento.mouse.x >= XBOTAO - 180 && evento.mouse.x <= XBOTAO + 70) {
+                        iniciaJogo(&turno, &rodada, &segundos, &minutos, &horas, &totPecasA, &totPecasV, &totDicasV, &totDicasA, &salvou, &podeJogar, &dica, &escreveu, &situacao, &situacaoDJogo, &vezDoComputador, &matou, situacaoAux, &pecaEscolhida, &movDica, &podeAndarPosicoes, &podeComerArcoGPosicoes, &podeComerArcoPPosicoes, &mostrarPecas, jogo);
+                    } else if (evento.mouse.x >= XBOTAO + 180 && evento.mouse.x <= XBOTAO + 430) {
                         situacao = 1;
                         situacaoAux = 1;
                     }
                     tempoDeEspera = 0;
                     clicou = 1;
-                    milisegundos = timeSleep;
+                    milisegundos = TIMESLEEP;
                 }
             }
 
             if (situacao == 7 && evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && !clicou ) {
-                if (evento.mouse.x >= xBotao && evento.mouse.x < xBotao + 280) {
-                    if (evento.mouse.y >= yBotao && evento.mouse.y <= yBotao + 70) {
+                if (evento.mouse.x >= XBOTAO && evento.mouse.x < XBOTAO + 280) {
+                    if (evento.mouse.y >= YBOTAO && evento.mouse.y <= YBOTAO + 70) {
                         situacao = situacaoAux;
                         salvou = -1;
-                    } else if (evento.mouse.y >= yBotao + 90 && evento.mouse.y <= yBotao + 160) {
+                    } else if (evento.mouse.y >= YBOTAO + 90 && evento.mouse.y <= YBOTAO + 160) {
                         salvou = escreveSave(turno, rodada, segundos, minutos, horas, totPecasA, totPecasV, totDicasV, totDicasA, situacaoAux, jogo);
-                    } else if (evento.mouse.y >= yBotao + 180 && evento.mouse.y <= yBotao + 250) {
+                    } else if (evento.mouse.y >= YBOTAO + 180 && evento.mouse.y <= YBOTAO + 250) {
                         situacao = 1;
                         situacaoAux = 1;
                     }
                     clicou = 1;
-                    milisegundos = timeSleep;
+                    milisegundos = TIMESLEEP;
                 }
             }
 
@@ -2086,57 +2032,20 @@ int main()
                 if (evento.mouse.x >= LARGURA_TELA / 2 - 500 && evento.mouse.x <= LARGURA_TELA / 2 + 500 && evento.mouse.y >= ALTURA_TELA / 2 - 150 && evento.mouse.y <= ALTURA_TELA / 2 + 50) {
                     if (evento.mouse.y >= ALTURA_TELA / 2 - 60 && evento.mouse.y <= ALTURA_TELA / 2 + 10) {
                         if (evento.mouse.x >= LARGURA_TELA / 2 - 175 && evento.mouse.x <= LARGURA_TELA / 2 - 10) {
-                            leSave(&turno, &rodada, &segundos, &minutos, &horas, &totPecasA, &totPecasV, &totDicasV, &totDicasA, situacaoAux, jogo);
-                            limpaTela();
-                            inicializarStruct(&movDica, jogo);
-                            inicializarStruct(&podeAndarPosicoes, jogo);
-                            inicializarStruct(&podeComerArcoGPosicoes, jogo);
-                            inicializarStruct(&podeComerArcoPPosicoes, jogo);
-                            inicializarStruct(&mostrarPecas, jogo);
-                            situacao = situacaoAux;
-                            pecaEscolhida.i = -1;
-                            situacaoDJogo = 0;
-                            podeJogar = 0;
-                            dica = 0;
-                            escreveu = 0;
-                            salvou = -1;
-                            if (situacaoAux == 3) {
-                                vezDoComputador = 0;
-                                matou = 0;
+                            if (!leSave(&turno, &rodada, &segundos, &minutos, &horas, &totPecasA, &totPecasV, &totDicasV, &totDicasA, situacaoAux, jogo)) {
+                                situacao = situacaoAux;
                             }
+                            iniciaJogo(&turno, &rodada, &segundos, &minutos, &horas, &totPecasA, &totPecasV, &totDicasV, &totDicasA, &salvou, &podeJogar, &dica, &escreveu, &situacao, &situacaoDJogo, &vezDoComputador, &matou, situacaoAux, &pecaEscolhida, &movDica, &podeAndarPosicoes, &podeComerArcoGPosicoes, &podeComerArcoPPosicoes, &mostrarPecas, jogo);
                         } else if (evento.mouse.x >= LARGURA_TELA / 2 + 10 && evento.mouse.x <= LARGURA_TELA / 2 + 175) {
-                            turno = 'R';
-                            rodada = 1;
-                            segundos = 0;
-                            minutos = 0;
-                            horas = 0;
-                            totPecasA = 12;
-                            totPecasV = 12;
-                            totDicasV = 2;
-                            totDicasA = 2;
-                            salvou = -1;
-                            podeJogar = 0;
-                            dica = 0;
-                            matou = 0;
-                            escreveu = 0;
                             situacao = situacaoAux;
-                            situacaoAux = situacaoAux;
-                            situacaoDJogo = 0;
-                            pecaEscolhida.i = -1;
-                            limpaTela();
-                            iniciarTabuleiro(jogo);
-                            inicializarStruct(&movDica, jogo);
-                            inicializarStruct(&podeAndarPosicoes, jogo);
-                            inicializarStruct(&podeComerArcoGPosicoes, jogo);
-                            inicializarStruct(&podeComerArcoPPosicoes, jogo);
-                            inicializarStruct(&mostrarPecas, jogo);
+                            iniciaJogo(&turno, &rodada, &segundos, &minutos, &horas, &totPecasA, &totPecasV, &totDicasV, &totDicasA, &salvou, &podeJogar, &dica, &escreveu, &situacao, &situacaoDJogo, &vezDoComputador, &matou, situacaoAux, &pecaEscolhida, &movDica, &podeAndarPosicoes, &podeComerArcoGPosicoes, &podeComerArcoPPosicoes, &mostrarPecas, jogo);
                         }
                         clicou = 1;
-                        milisegundos = timeSleep;
+                        milisegundos = TIMESLEEP;
                     }
                 } else {
                     clicou = 1;
-                    milisegundos = timeSleep;
+                    milisegundos = TIMESLEEP;
                     situacao = 1;
                     situacaoAux = 1;
                 }
@@ -2150,32 +2059,32 @@ int main()
 
                 al_clear_to_color(al_map_rgb(255, 255, 255));
                 al_draw_text(fontTitulo, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5, ALLEGRO_ALIGN_CENTER, "Surakarta");
-                al_draw_rectangle(xBotao, yBotao, xBotao + 280, yBotao + 70, al_map_rgb(0, 0, 0), 2);
+                al_draw_rectangle(XBOTAO, YBOTAO, XBOTAO + 280, YBOTAO + 70, al_map_rgb(0, 0, 0), 2);
                 al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 4 + 70, ALLEGRO_ALIGN_CENTER, "Jogar jxj");
-                al_draw_rectangle(xBotao, yBotao + 90, xBotao + 280, yBotao + 160, al_map_rgb(0, 0, 0), 2);
+                al_draw_rectangle(XBOTAO, YBOTAO + 90, XBOTAO + 280, YBOTAO + 160, al_map_rgb(0, 0, 0), 2);
                 al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 4 + 160, ALLEGRO_ALIGN_CENTER, "Jogar jxpc");
-                al_draw_rectangle(xBotao, yBotao + 180, xBotao + 280, yBotao + 250, al_map_rgb(0, 0, 0), 2);
+                al_draw_rectangle(XBOTAO, YBOTAO + 180, XBOTAO + 280, YBOTAO + 250, al_map_rgb(0, 0, 0), 2);
                 al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 4 + 250, ALLEGRO_ALIGN_CENTER, "Ajuda");
-                al_draw_rectangle(xBotao, yBotao + 270, xBotao + 280, yBotao + 340, al_map_rgb(0, 0, 0), 2);
+                al_draw_rectangle(XBOTAO, YBOTAO + 270, XBOTAO + 280, YBOTAO + 340, al_map_rgb(0, 0, 0), 2);
                 al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 4 + 340, ALLEGRO_ALIGN_CENTER, "Historico");
-                al_draw_rectangle(xBotao, yBotao + 360, xBotao + 280, yBotao + 430, al_map_rgb(0, 0, 0), 2);
+                al_draw_rectangle(XBOTAO, YBOTAO + 360, XBOTAO + 280, YBOTAO + 430, al_map_rgb(0, 0, 0), 2);
                 al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 4 + 430, ALLEGRO_ALIGN_CENTER, "Sair");
 
                 al_flip_display();
                 break;
             case 2:    
-                exibirJogo(jogo, mostrarPecas, podeAndarPosicoes, podeComerArcoPPosicoes, podeComerArcoGPosicoes, movDica, tabuleiro, font, horas, minutos, segundos, turno, corTrasparente, vezDoComputador, situacaoDJogo, &podeJogar, totDicasV, totDicasA, dica);
+                exibirJogo(jogo, mostrarPecas, podeAndarPosicoes, podeComerArcoPPosicoes, podeComerArcoGPosicoes, movDica, tabuleiro, font, rodada, horas, minutos, segundos, turno, corTrasparente, vezDoComputador, situacaoDJogo, &podeJogar, totDicasV, totDicasA, dica);
                 al_flip_display();
                 jogadaPossivel(&podeAndarPosicoes, &podeComerArcoPPosicoes, &podeComerArcoGPosicoes, vetL, jogo, pecaEscolhida, podeJogar, &situacaoDJogo);           
                 break;
             case 3:  
-                exibirJogo(jogo, mostrarPecas, podeAndarPosicoes, podeComerArcoPPosicoes, podeComerArcoGPosicoes, movDica, tabuleiro, font, horas, minutos, segundos, turno, corTrasparente, vezDoComputador, situacaoDJogo, &podeJogar, totDicasV, totDicasA, dica);
+                exibirJogo(jogo, mostrarPecas, podeAndarPosicoes, podeComerArcoPPosicoes, podeComerArcoGPosicoes, movDica, tabuleiro, font, rodada, horas, minutos, segundos, turno, corTrasparente, vezDoComputador, situacaoDJogo, &podeJogar, totDicasV, totDicasA, dica);
                 al_flip_display();
                 if (!vezDoComputador) {
                     jogadaPossivel(&podeAndarPosicoes, &podeComerArcoPPosicoes, &podeComerArcoGPosicoes, vetL, jogo, pecaEscolhida, podeJogar, &situacaoDJogo);
                 } else {
                     if (tempoDeEspera > 1) {
-                        inicializarStruct(&jogadaDoComputador, jogo);
+                        inicializarStruct(&jogadaDoComputador);
                         op = rand() % 2;
                         if (op == 1) {
                             descobrirMovimentoPossivel(jogo, &jogadaDoComputador, &matou, dica, 'B');
@@ -2204,8 +2113,8 @@ int main()
                 switch (pagAjuda) {
                     case 1:
                         al_clear_to_color(al_map_rgb(255, 255, 255));
-
                         al_draw_text(fontTitulo, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5 - 100, ALLEGRO_ALIGN_CENTER, "O que e surakarta?");
+
                         al_draw_text(fontTexto, al_map_rgb(100, 100, 100), 30, ALTURA_TELA / 5, ALLEGRO_ALIGN_LEFT, "Surakarta e um jogo de tabuleiro, para 2 pessoas. O jogo possui algumas caracteristicas comuns com o"); 
                         al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 20, ALLEGRO_ALIGN_LEFT, "xadrez, como as pecas se moverem como o rei (horizontal, vertical, diagonal, mas apenas uma casa por lance)");
                         al_draw_text(fontTexto, al_map_rgb(100,100,100), 3, ALTURA_TELA / 5 + 40, ALLEGRO_ALIGN_LEFT, "e a captura ser por substituicao, ou seja, a peca que captura move-se para a casa da peca capturada. Porem, o ");
@@ -2315,6 +2224,7 @@ int main()
                     default:
                         al_clear_to_color(al_map_rgb(255, 0, 0));
                         al_draw_text(font, al_map_rgb(255, 255, 255), LARGURA_TELA / 2, ALTURA_TELA / 2, ALLEGRO_ALIGN_CENTER, "Erro");
+                        
                         al_flip_display();
                         break;
                 }
@@ -2355,6 +2265,7 @@ int main()
                 al_draw_circle(50, 50, 40, al_map_rgb(0, 0, 0), 3);
                 al_draw_line(30, 30, 70, 70, al_map_rgb(0, 0, 0), 3);
                 al_draw_line(30, 70, 70, 30, al_map_rgb(0, 0, 0), 3);
+
                 al_flip_display();
                 break;
             case 6:
@@ -2368,7 +2279,6 @@ int main()
                         vitoriasAPvc += (situacaoAux == 2) ? 0 : 1;
                         printf("Azul venceu!\n");
                     }
-
                     if (situacaoAux == 2) {
                         atualizaVetoresTempo(horas, minutos, segundos, horasPvp, minutosPvp, segundosPvp);
                         totPartPvp++;
@@ -2389,23 +2299,23 @@ int main()
                 }
                 al_draw_textf(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5 + 50, ALLEGRO_ALIGN_CENTER, "Tempo: %02d:%02d:%02d", horas, minutos, segundos);
                 
-                al_draw_rectangle(xBotao - 180, yBotao + 20, xBotao + 70, yBotao + 100, al_map_rgb(0, 0, 0), 2);
-                al_draw_text(font, al_map_rgb(0, 0, 0), xBotao - 50, yBotao + 45, ALLEGRO_ALIGN_CENTER, "Recomecar");
-                al_draw_rectangle(xBotao + 180, yBotao + 20, xBotao + 430, yBotao + 100, al_map_rgb(0, 0, 0), 2);
-                al_draw_text(font, al_map_rgb(0, 0, 0), xBotao + 310, yBotao + 45, ALLEGRO_ALIGN_CENTER, "Menu");
+                al_draw_rectangle(XBOTAO - 180, YBOTAO + 20, XBOTAO + 70, YBOTAO + 100, al_map_rgb(0, 0, 0), 2);
+                al_draw_text(font, al_map_rgb(0, 0, 0), XBOTAO - 50, YBOTAO + 45, ALLEGRO_ALIGN_CENTER, "Recomecar");
+                al_draw_rectangle(XBOTAO + 180, YBOTAO + 20, XBOTAO + 430, YBOTAO + 100, al_map_rgb(0, 0, 0), 2);
+                al_draw_text(font, al_map_rgb(0, 0, 0), XBOTAO + 310, YBOTAO + 45, ALLEGRO_ALIGN_CENTER, "Menu");
                 
                 al_flip_display();
                 break;
             case 7:
                 al_clear_to_color(al_map_rgb(255, 255, 255));
-                exibirJogo(jogo, mostrarPecas, podeAndarPosicoes, podeComerArcoPPosicoes, podeComerArcoGPosicoes, movDica, tabuleiro, font, horas, minutos, segundos, turno, corTrasparente, vezDoComputador, situacaoDJogo, &podeJogar, totDicasV, totDicasA, dica);
+                exibirJogo(jogo, mostrarPecas, podeAndarPosicoes, podeComerArcoPPosicoes, podeComerArcoGPosicoes, movDica, tabuleiro, font, rodada, horas, minutos, segundos, turno, corTrasparente, vezDoComputador, situacaoDJogo, &podeJogar, totDicasV, totDicasA, dica);
                 al_draw_filled_rectangle(0, 0, LARGURA_TELA, ALTURA_TELA, corBrancoTrasparente);
                 al_draw_text(fontTitulo, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 5, ALLEGRO_ALIGN_CENTER, "Jogo Pausado");
-                al_draw_rectangle(xBotao, yBotao, xBotao + 280, yBotao + 70, al_map_rgb(0, 0, 0), 2);
+                al_draw_rectangle(XBOTAO, YBOTAO, XBOTAO + 280, YBOTAO + 70, al_map_rgb(0, 0, 0), 2);
                 al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 4 + 70, ALLEGRO_ALIGN_CENTER, "Voltar");
-                al_draw_rectangle(xBotao, yBotao + 90, xBotao + 280, yBotao + 160, al_map_rgb(0, 0, 0), 2);
+                al_draw_rectangle(XBOTAO, YBOTAO + 90, XBOTAO + 280, YBOTAO + 160, al_map_rgb(0, 0, 0), 2);
                 al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 4 + 160, ALLEGRO_ALIGN_CENTER, "Salvar");
-                al_draw_rectangle(xBotao, yBotao + 180, xBotao + 280, yBotao + 250, al_map_rgb(0, 0, 0), 2);
+                al_draw_rectangle(XBOTAO, YBOTAO + 180, XBOTAO + 280, YBOTAO + 250, al_map_rgb(0, 0, 0), 2);
                 al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 4 + 250, ALLEGRO_ALIGN_CENTER, "Menu");
 
                 if (salvou == 1) {
@@ -2426,11 +2336,11 @@ int main()
                 al_draw_text(font, al_map_rgb(0, 0, 0), LARGURA_TELA / 2, ALTURA_TELA / 2 - 130, ALLEGRO_ALIGN_CENTER, "Jogo salvo encontrado, deseja abrir?");
                 
                 al_flip_display();
-
                 break;
             default:
                 al_clear_to_color(al_map_rgb(255, 0, 0));
                 al_draw_text(font, al_map_rgb(255, 255, 255), LARGURA_TELA / 2, ALTURA_TELA / 2, ALLEGRO_ALIGN_CENTER, "Erro");
+                
                 al_flip_display();
                 break;
         }
